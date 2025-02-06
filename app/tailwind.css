@@ -10,3 +10,44 @@ body {
     color-scheme: dark;
   }
 }
+
+body {
+  background-color: #1e1e1e; /* Dark background */
+  color: white;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+.kanban-board {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.kanban-column {
+  background: #282c34;
+  border-radius: 8px;
+  padding: 16px;
+  width: 250px;
+  min-height: 300px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.kanban-column h3 {
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.kanban-task {
+  background: #3a3f4b;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.kanban-task strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 5px;
+}

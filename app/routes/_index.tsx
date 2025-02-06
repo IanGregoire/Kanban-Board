@@ -1,97 +1,60 @@
-import { useEffect, useState } from "react";
-import { LoaderFunction, json } from "@remix-run/node";
+import { LoaderFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { supabase } from "~/utils/supabase.server";
+import { supabase } from "~/utils/supabase.server"; // Server-side client
+
+type Column = {
+  id: number;
+  title: string;
+  position: number;
+}
+
+type Task = {
+  id: number;
+  title: string;
+  description: string;
+  column_id: number;
+  position: number;
+  start_date: string;
+  end_date: string;
+}
 
 // Loader to fetch initial data
-export const loader: LoaderFunction = async () => {
-  const { data: columns, error: columnError } = await supabase
+export const loader: LoaderFunction = async() => {
+  try {
+    const { data: columns, error: columnError } = await supabase
     .from("columns")
     .select("*")
     .order("position");
+    
+    if(columnError) throw new Error(`Columns fetch error: ${columnError.message}`);
 
-  if (columnError) throw new Error(columnError.message);
+    const { data: tasks, error: taskError } = await supabase
+    .from('tasks')
+    .select('*')
+    .order('position');
 
-  const { data: tasks, error: taskError } = await supabase
-    .from("tasks")
-    .select("*")
-    .order("position");
+    if(taskError) throw new Error(`Tasks fetch error: ${taskError.message}`);
 
-  if (taskError) throw new Error(taskError.message);
-
-  return json({ columns, tasks });
+    return Response.json({ columns, tasks});
+  } catch(error: any) {
+    console.error('Loader Error:', error.message);
+    throw new Response(error.message, { status: 500 });
+  }
 };
 
 export default function Index() {
-  const { columns: initialColumns, tasks: initialTasks } = useLoaderData<typeof loader>();
-  const [columns, setColumns] = useState(initialColumns);
-  const [tasks, setTasks] = useState(initialTasks);
-
-  // Create a function to handle inserts
-  const handleInserts = (payload: any) => {
-    console.log('Change received!', payload)
-  }
-  useEffect(() => {
-    // Function to fetch and update data
-    const fetchData = async () => {
-      const { data: updatedColumns } = await supabase
-        .from("columns")
-        .select("*")
-        .order("position");
-
-      const { data: updatedTasks } = await supabase
-        .from("tasks")
-        .select("*")
-        .order("position");
-
-      setColumns(updatedColumns || []);
-      setTasks(updatedTasks || []);
-    };
-
-    // Real-time subscriptions
-    const columnsSubscription = supabase
-    .channel('columns')
-    .on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public.columns',
-        table: 'columns'
-      },
-      (payload) => console.log(payload)
-    )
-    .subscribe()
-
-    const tasksSubscription = supabase
-    .channel('tasks')
-    .on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'tasks'
-      },
-      (payload) => console.log(payload)
-    )
-    .subscribe()
-
-    // Cleanup subscriptions on component unmount
-    return () => {
-      supabase.removeChannel(columnsSubscription);
-      supabase.removeChannel(tasksSubscription);
-    };
-  }, []);
+  const { columns, tasks } = useLoaderData<typeof loader>();
 
   return (
-    <div style={{ display: "flex", gap: "16px" }}>
+    <div className={"kanban-board"}>
       {columns.map((column: any) => (
-        <div key={column.id} style={{ border: "1px solid black", padding: "16px" }}>
+        <div key={column.id} className="kanban-column">
           <h3>{column.title}</h3>
           <ul>
             {tasks
               .filter((task: any) => task.column_id === column.id)
               .map((task: any) => (
-                <li key={task.id}>
+                <li key={task.id} className="kanban-task">
                   <strong>{task.title}</strong>
                   <p>{task.description}</p>
                 </li>
