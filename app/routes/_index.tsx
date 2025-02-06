@@ -46,17 +46,17 @@ export default function Index() {
   const { columns, tasks } = useLoaderData<typeof loader>();
 
   return (
-    <div className={"kanban-board"}>
+    <div className="flex justify-center gap-6 p-6">
       {columns.map((column: any) => (
-        <div key={column.id} className="kanban-column">
-          <h3>{column.title}</h3>
-          <ul>
+        <div key={column.id}  className="w-72 min-h-[300px] bg-gray-100 dark:bg-gray-800 p-4 rounded-xl shadow-lg">
+          <h3 className="text-center font-semibold text-lg mb-4">{column.title}</h3>
+          <ul className="space-y-4">
             {tasks
               .filter((task: any) => task.column_id === column.id)
               .map((task: any) => (
-                <li key={task.id} className="kanban-task">
-                  <strong>{task.title}</strong>
-                  <p>{task.description}</p>
+                <li key={task.id} className="p-3 bg-gray-200 dark:bg-gray-700 rounded-lg shadow">
+                  <strong className="block text-gray-900 dark:text-white">{task.title}</strong>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm">{task.description}</p>
                 </li>
               ))}
           </ul>
