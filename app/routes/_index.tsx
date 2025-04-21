@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import { LoaderFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { supabase } from "~/utils/supabase.server"; // Server-side client
+import { safeGetSupabaseClient } from "~/utils/supabase.client";
 
 type Column = {
   id: number;
@@ -44,6 +46,15 @@ export const loader: LoaderFunction = async() => {
 
 export default function Index() {
   const { columns, tasks } = useLoaderData<typeof loader>();
+  console.log("Index file");
+
+  useEffect(() => {
+    const supabase = safeGetSupabaseClient();
+    console.log("Effect running");
+    if (supabase) {
+      // do something
+    }
+  }, []);
 
   return (
     <div className="flex justify-center gap-6 p-6">

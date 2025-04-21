@@ -1,8 +1,29 @@
-// utils/supabase.client.ts
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-// Use environment variables exposed via window.ENV
-const supabaseUrl = window.ENV.SUPABASE_URL;
-const supabaseAnonKey = window.ENV.SUPABASE_ANON_KEY;
+let client: SupabaseClient | null = null;
 
-export const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+export function getSupabaseClient() {
+  if (typeof window === "undefined") {
+    throw new Error("getSupabaseClient should only be called on the client");
+  }
+
+  if (!client) {
+    const supabaseUrl = window.ENV.SUPABASE_URL;
+    const supabaseAnonKey = window.ENV.SUPABASE_ANON_KEY;
+    client = createClient(supabaseUrl, supabaseAnonKey);
+  }
+
+  return client;
+}
+export function safeGetSupabaseClient() {
+    if (typeof window === "undefined" || !window.ENV?.SUPABASE_URL) {
+      return null;
+    }
+  
+    if (!client) {
+      client = createClient(window.ENV.SUPABASE_URL, window.ENV.SUPABASE_ANON_KEY);
+    }
+  
+    return client;
+  }
+  

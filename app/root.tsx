@@ -33,31 +33,27 @@ export const links: LinksFunction = () => [
   },
 ];
 
-export function Layout({ children }: { children: React.ReactNode }) {
-  const data = useLoaderData<typeof loader>();
-
+export function Layout({ children, env }: { children: React.ReactNode; env: Record<string, string> }) {
   return (
-    <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <Meta />
-        <Links />
-      </head>
-      <body>
-        {children}
-        <ScrollRestoration />
-        <Scripts />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.ENV = ${JSON.stringify(data.ENV)}`,
-          }}
-        />
-      </body>
-    </html>
+    <>
+      {children}
+      <ScrollRestoration />
+      <Scripts />
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `window.ENV = ${JSON.stringify(env)}`,
+        }}
+      />
+    </>
   );
 }
 
 export default function App() {
-  return <Outlet />;
+  const data = useLoaderData<typeof loader>();
+
+  return (
+    <Layout env={data.ENV}>
+      <Outlet />
+    </Layout>
+  );
 }
