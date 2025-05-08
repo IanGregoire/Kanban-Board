@@ -10,6 +10,8 @@ import { hydrateRoot } from "react-dom/client";
 
 const container = document.getElementById("root");
 
+console.log("🔥 entry.client.tsx is running");
+
 if (container) {
   startTransition(() => {
     hydrateRoot(

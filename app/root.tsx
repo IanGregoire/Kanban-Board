@@ -6,13 +6,14 @@ import {
   ScrollRestoration,
   useLoaderData 
 } from "@remix-run/react";
+import { json } from "@remix-run/node";
 import type { LinksFunction, LoaderFunction } from "@remix-run/node";
 
 import "./tailwind.css";
 
 // Expose environment variables to the client
 export const loader: LoaderFunction = () => {
-  return Response.json({
+  return json({
     ENV: {
       SUPABASE_URL: process.env.SUPABASE_URL,
       SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
@@ -33,27 +34,27 @@ export const links: LinksFunction = () => [
   },
 ];
 
-export function Layout({ children, env }: { children: React.ReactNode; env: Record<string, string> }) {
-  return (
-    <>
-      {children}
-      <ScrollRestoration />
-      <Scripts />
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `window.ENV = ${JSON.stringify(env)}`,
-        }}
-      />
-    </>
-  );
-}
-
 export default function App() {
   const data = useLoaderData<typeof loader>();
 
   return (
-    <Layout env={data.ENV}>
-      <Outlet />
-    </Layout>
+    <html lang="en">
+      <head>
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        <div id='root'>
+          <Outlet />
+          <ScrollRestoration />
+          <Scripts />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `window.ENV = ${JSON.stringify(data)}`,
+            }}
+          />
+        </div>
+      </body>
+    </html>
   );
 }
