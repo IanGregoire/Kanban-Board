@@ -2,6 +2,12 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 let client: SupabaseClient | null = null;
 
+const supabaseUrl = window.ENV.SUPABASE_URL;
+const supabaseAnonKey = window.ENV.SUPABASE_ANON_KEY;
+
+export const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+
+
 export function getSupabaseClient() {
   if (typeof window === "undefined") {
     throw new Error("getSupabaseClient should only be called on the client");
@@ -15,6 +21,7 @@ export function getSupabaseClient() {
 
   return client;
 }
+
 export function safeGetSupabaseClient() {
     if (typeof window === "undefined" || !window.ENV?.SUPABASE_URL) {
       return null;
@@ -26,4 +33,3 @@ export function safeGetSupabaseClient() {
   
     return client;
   }
-  
