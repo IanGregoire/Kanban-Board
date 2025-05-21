@@ -17,9 +17,13 @@ export default function TaskModal({ task, columns, onClose }: Props) {
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description);
   const [columnId, setColumnId] = useState(task.column_id);
-  const [startDate, setStartDate] = useState(task.start_date);
-  const [endDate, setEndDate] = useState(task.end_date);
+  const [startDate, setStartDate] = useState(task.start_date?.split('T')[0] || '');
+  const [endDate, setEndDate] = useState(task.end_date?.split('T')[0] || '');
   const fetcher = useFetcher();
+
+  const start_date = startDate ? `${startDate}T00:00:00` : null;
+  const end_date = endDate ? `${endDate}T00:00:00` : null;
+
 
   function handleSave() {
     const formData = new FormData();
@@ -27,8 +31,8 @@ export default function TaskModal({ task, columns, onClose }: Props) {
     formData.append("title", title);
     formData.append("description", description);
     formData.append("column_id", columnId.toString());
-    formData.append("start_date", startDate ?? "");
-    formData.append("end_date", endDate ?? "");
+    formData.append("start_date", start_date ?? "");
+    formData.append("end_date", end_date ?? "");
 
     fetcher.submit(formData, {
       method: "POST",
@@ -74,7 +78,8 @@ export default function TaskModal({ task, columns, onClose }: Props) {
             <input
               type="date"
               className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
-              value={task.start_date ? task.start_date.split('T')[0] : ''}
+              // value={task.start_date ? task.start_date.split('T')[0] : ''}
+              value={startDate ?? ''}
               onChange={(e) => setStartDate(e.target.value)}
               />
 
@@ -82,7 +87,8 @@ export default function TaskModal({ task, columns, onClose }: Props) {
             <input
               type="date"
               className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
-              value={task.end_date ? task.end_date.split('T')[0] : ''}
+              // value={task.end_date ? task.end_date.split('T')[0] : ''}
+              value={endDate ?? ''}
               onChange={(e) => setEndDate(e.target.value)}
               />
           </div>
