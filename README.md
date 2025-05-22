@@ -41,12 +41,11 @@ This template comes with [Tailwind CSS](https://tailwindcss.com/) already config
 
 # 🏗️ Remix Kanban Board with Supabase
 
-A **Kanban Board** built with **Remix** and **Supabase** for real-time task management. This project supports **drag-and-drop**, real-time updates, and persistence using Supabase as the backend.
+A **Kanban Board** built with **Remix** and **Supabase** for real-time task management. This project supports real-time updates, and persistence using Supabase as the backend.
 
 ---
 
 ## 🚀 Features
-- 🖼 **Drag-and-Drop** task management  
 - 🔄 **Real-time Updates** with Supabase  
 - 🛠 **Remix for Full-Stack Rendering**  
 - 🔐 **Authentication (Optional - Supabase Auth)**  
@@ -59,7 +58,7 @@ A **Kanban Board** built with **Remix** and **Supabase** for real-time task mana
 
 ### 1️⃣ Clone the repository:
 ```bash
-git clone https://github.com/YOUR_GITHUB_USERNAME/remix-kanban.git
+git clone https://github.com/IanGregoire/remix-kanban.git
 cd remix-kanban
 ```
 
