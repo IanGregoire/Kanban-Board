@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { ActionFunctionArgs, LoaderFunction } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { Form, useLoaderData } from "@remix-run/react";
 import { supabase } from "~/utils/supabase.server"; // Server-side client
-// import { getSupabaseClient } from "~/utils/supabase.client";
 import Column from "~/components/Column";
 import TaskModal from "~/components/TaskModal";
 import { json, redirect  } from "@remix-run/node";
@@ -24,8 +23,23 @@ export type Task = {
 }
 
 // Loader to fetch initial data
-export const loader: LoaderFunction = async() => {
+export const loader: LoaderFunction = async({ request }) => {
   try {
+    const url = new URL(request.url);
+    const projectIdFromUrl = url.searchParams.get("projectId");
+
+    const { data: projects, error: projectError } = await supabase
+    .from('projects')
+    .select('*')
+    .order('id');
+    
+    if(projectError) throw new Error(`Projects fetch error: ${projectError.message}`);
+    if (!projects || projects.length === 0) throw new Error("No projects found");
+
+    // Determine selected project
+    const selectedProject =
+      projects.find((p) => p.id === projectIdFromUrl) || projects[0];
+
     const { data: columns, error: columnError } = await supabase
     .from("columns")
     .select("*")
@@ -36,11 +50,13 @@ export const loader: LoaderFunction = async() => {
     const { data: tasks, error: taskError } = await supabase
     .from('tasks')
     .select('*')
-    .order('position');
+    .eq("project_id", selectedProject.id);
 
     if(taskError) throw new Error(`Tasks fetch error: ${taskError.message}`);
 
-    return json({ columns, tasks});
+
+
+    return json({ projects, selectedProject, columns, tasks});
   } catch(error: any) {
     console.error('Loader Error:', error.message);
     throw new Response(error.message, { status: 500 });
@@ -48,7 +64,6 @@ export const loader: LoaderFunction = async() => {
 };
 
 export async function action({ request }: ActionFunctionArgs) {
-  // const supabase = getSupabaseClient(); just using server works
   const formData = await request.formData();
 
   const intent = formData.get('intent');
@@ -59,6 +74,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
   const column_id = Number(formData.get("column_id"));
+  const project_id = formData.get("project_id") as string;
 
   // Use today's date as fallback
   const start_date = formData.get("start_date") || today; // before || today was as string || null
@@ -76,7 +92,7 @@ export async function action({ request }: ActionFunctionArgs) {
     return redirect('/');
   }
 
-  if (!title || !column_id) {
+  if (!title || !column_id || !project_id) {
     return json({ error: "Missing fields" }, { status: 400 });
   }
 
@@ -108,28 +124,58 @@ export async function action({ request }: ActionFunctionArgs) {
   } else {
     const { error } = await supabase
       .from("tasks")
-      .insert([{ title, description, column_id, start_date, end_date, position: nextPosition,}])
+      .insert([{ title, description, column_id, start_date, end_date, project_id, position: nextPosition}])
       .select();
 
     if (error) return json({ error: "Create failed" }, { status: 500 });
   }
 
-  return redirect("/"); // Reload page to show updated tasks
+  return redirect("/"); // Reload page to show updated tasks Doesn't work currently
 }
 
 export default function Index() {
-  const { columns, tasks } = useLoaderData<typeof loader>();
+  const { projects, selectedProjectId , columns, tasks } = useLoaderData<typeof loader>();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showNewtaskModal, setShowNewTaskModal] = useState(false);
 
+  function handleAddProject() {
+    // Want to add to database so show modal to add project details
+  }
+
   return (
-    <div className="flex flex-col justify-right p-6">
-      <button
-        onClick={() => setShowNewTaskModal(true)}
-        className="bg-green-600 text-white px-6 py-1 rounded hover:bg-green-700"
-      >
-        + Add task
-      </button>
+    <div>
+      <div className="flex items-center justify-between gap-12 p-6 bg-gray-900 text-white">
+        <Form method="get" className="flex items-center gap-3">
+          <select
+            className="bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white"
+            name="projectId"
+            defaultValue={selectedProjectId}
+            onChange={(e) => e.currentTarget.form?.requestSubmit()}
+          >
+            {projects.map((project: any) => (
+              <option key={project.id} value={project.id}>
+                {project.name}
+              </option>
+            ))}
+          </select>
+
+          <button
+            type="button"
+            onClick={handleAddProject}
+            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded"
+          >
+            + Add Project
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowNewTaskModal(true)}
+            className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-3 py-2 rounded"
+          >
+            + Add Task
+          </button>
+        </Form>
+      </div>
       <div className="flex justify-center gap-6 p-6">
         {columns.map((column: any) => (
           <div key={column.id} className="w-72 min-h-[300px] bg-gray-100 dark:bg-gray-800 p-4 rounded-xl shadow-lg">
@@ -147,14 +193,14 @@ export default function Index() {
       {selectedTask && (
         <TaskModal
           task={selectedTask}
-          columns={columns} // <-- pass columns here
+          columns={columns}
           onClose={() => setSelectedTask(null)}
           mode='edit'
         />
       )}
       {showNewtaskModal && (
         <TaskModal
-          columns={columns} // <-- pass columns here
+          columns={columns}
           onClose={() => setShowNewTaskModal(false)}
           mode='create'
         />
