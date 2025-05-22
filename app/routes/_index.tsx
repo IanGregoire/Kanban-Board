@@ -5,6 +5,7 @@ import { supabase } from "~/utils/supabase.server"; // Server-side client
 import Column from "~/components/Column";
 import TaskModal from "~/components/TaskModal";
 import { json, redirect  } from "@remix-run/node";
+import ProjectModal from "~/components/ProjectModal";
 
 type Column = {
   id: number;
@@ -80,6 +81,24 @@ export async function action({ request }: ActionFunctionArgs) {
   const start_date = formData.get("start_date") || today; // before || today was as string || null
   const end_date = formData.get("end_date") || today; // Optional — you could also default to today if needed
 
+  if(intent === 'create-project') {
+    const name = formData.get('name') as string;
+
+    if(!name) {
+      return json({ error: 'Project name is required'}, {status: 400});
+    }
+
+    const { error } = await supabase
+      .from('projects')
+      .insert({ name });
+
+    if(error) {
+      console.error('Supabase error:', error.message);
+      return json({ error: 'Failed to add project'}, { status: 500 });
+    }
+
+    return redirect('/');
+  }
   if(intent === 'delete') {
     if(!id) return json({ error: 'Task ID is required' }, { status: 400 });
 
@@ -134,9 +153,10 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function Index() {
-  const { projects, selectedProjectId , columns, tasks } = useLoaderData<typeof loader>();
+  const { projects, selectedProject , columns, tasks } = useLoaderData<typeof loader>();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showNewtaskModal, setShowNewTaskModal] = useState(false);
+  const [showProjectModal, setShowProjectModal] = useState(false);
 
   function handleAddProject() {
     // Want to add to database so show modal to add project details
@@ -149,7 +169,7 @@ export default function Index() {
           <select
             className="bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white"
             name="projectId"
-            defaultValue={selectedProjectId}
+            defaultValue={selectedProject.id}
             onChange={(e) => e.currentTarget.form?.requestSubmit()}
           >
             {projects.map((project: any) => (
@@ -161,7 +181,7 @@ export default function Index() {
 
           <button
             type="button"
-            onClick={handleAddProject}
+            onClick={() => setShowProjectModal(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded"
           >
             + Add Project
@@ -201,9 +221,13 @@ export default function Index() {
       {showNewtaskModal && (
         <TaskModal
           columns={columns}
+          selectedProjectId={selectedProject.id}
           onClose={() => setShowNewTaskModal(false)}
           mode='create'
         />
+      )}
+      {showProjectModal && (
+        <ProjectModal onClose={() => setShowProjectModal(false)}/>
       )}
       </div>
     </div>

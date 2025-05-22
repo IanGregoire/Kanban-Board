@@ -9,17 +9,16 @@ type Column = {
 
 type Props = {
   task?: Task;  // Optional for new task
+  selectedProjectId?: string;
   columns: Column[];
   onClose: () => void;
   mode: 'create' | 'edit';
 };
 
-export default function TaskModal({ task, columns, onClose, mode }: Props) {
+export default function TaskModal({ task, selectedProjectId, columns, onClose, mode }: Props) {
   const [title, setTitle] = useState(task?.title ?? '');
   const [description, setDescription] = useState(task?.description ?? '');
   const [columnId, setColumnId] = useState(task?.column_id ?? columns[0]?.id ?? 1);
-  // const [startDate, setStartDate] = useState(task?.start_date?.split('T')[0] ?? '');
-  // const [endDate, setEndDate] = useState(task?.end_date?.split('T')[0] ?? '');
   const fetcher = useFetcher();
 
   const today = new Date().toISOString().split("T")[0];
@@ -37,6 +36,10 @@ export default function TaskModal({ task, columns, onClose, mode }: Props) {
     formData.append('mode', mode);
     if(mode === 'edit') {
       formData.append('id', task!.id.toString());
+    }
+    if(mode === 'create') {
+      console.log("Selected Project", selectedProjectId);
+      formData.append('project_id', selectedProjectId!);
     }
     // formData.append("id", task.id.toString());
     formData.append("title", title);
