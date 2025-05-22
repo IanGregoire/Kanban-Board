@@ -46,37 +46,43 @@ A **Kanban Board** built with **Remix** and **Supabase** for real-time task mana
 ---
 
 ## 🚀 Features
-- 🔄 **Real-time Updates** with Supabase  
-- 🛠 **Remix for Full-Stack Rendering**  
-- 🔐 **Authentication (Optional - Supabase Auth)**  
-- 💾 **Persistent Storage with Supabase Database**  
-- 🌎 **Deployable on Vercel, Netlify, or Fly.io**  
+
+- 🔄 **Real-time Updates** with Supabase
+- 🛠 **Remix for Full-Stack Rendering**
+- 🔐 **Authentication (Optional - Supabase Auth)**
+- 💾 **Persistent Storage with Supabase Database**
+- 🌎 **Deployable on Vercel, Netlify, or Fly.io**
 
 ---
 
 ## 🏗️ Installation & Setup
 
 ### 1️⃣ Clone the repository:
+
 ```bash
-git clone https://github.com/IanGregoire/remix-kanban.git
-cd remix-kanban
+git clone https://github.com/IanGregoire/kanban-board.git
+cd kanban-board
 ```
 
 ### Install dependencies
+
 ```bash
 npm install
 ```
 
 ### Setup Supabase
+
 - Go to supabase.com and create new project
 - Copy your SUPABASE_URL and SUPABASE_ANON_KEY from the project settings.
 - Create a .env file and add
+
 ```env
 SUPABASE_URL=your-supabase-url
 SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
 ### Run Development Server
+
 ```bash
 npm run dev
 ```
@@ -84,6 +90,7 @@ npm run dev
 Now open your browser and go to http://localhost:3000
 
 ### Project Structure
+
 ```bash
 remix-kanban/
 │-- app/
@@ -102,28 +109,37 @@ remix-kanban/
 ```
 
 ### Deployment
+
 - Deploy to Vercel
+
   ```bash
   vercel
   ```
+
   Set environment variables on Vercel dashboard (SUPABASE_URL, SUPABASE_ANON_KEY
 
 - Deploy to Netlify
+
 ```bash
 netlify deploy
 ```
+
 Add .env variables in Netlify dashboard → Site settings → Environment Variables.
 
 - Deploy to Fly.io
+
 ```bash
 flyctl launch
 ```
+
 Set secrets
+
 ```bash
 flyctl secrets set SUPABASE_URL=your-supabase-url SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
 ### Technologies Used
+
 - Remix - Full-stack React Framework
 - Supabase - Backend as a Service
 - React - UI Framework
