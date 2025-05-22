@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ActionFunctionArgs, LoaderFunction } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 import { supabase } from "~/utils/supabase.server"; // Server-side client
 import Column from "~/components/Column";
 import TaskModal from "~/components/TaskModal";
@@ -99,6 +99,30 @@ export async function action({ request }: ActionFunctionArgs) {
 
     return redirect('/');
   }
+
+  if(intent === 'delete-project') {
+    const projectId = formData.get("projectId") as string;
+
+    if (!projectId) {
+      return json({ error: "Project ID missing" }, { status: 400 });
+    }
+  
+    // Optional: delete related tasks first to avoid foreign key constraint
+    await supabase.from("tasks").delete().eq("project_id", projectId);
+  
+    const { error } = await supabase
+      .from("projects")
+      .delete()
+      .eq("id", projectId);
+  
+    if (error) {
+      console.error("Error deleting project:", error.message);
+      return json({ error: "Failed to delete project" }, { status: 500 });
+    }
+  
+    return redirect("/"); // reload with updated project list
+  }
+
   if(intent === 'delete') {
     if(!id) return json({ error: 'Task ID is required' }, { status: 400 });
 
@@ -157,9 +181,16 @@ export default function Index() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showNewtaskModal, setShowNewTaskModal] = useState(false);
   const [showProjectModal, setShowProjectModal] = useState(false);
+  const fetcher = useFetcher();
 
-  function handleAddProject() {
-    // Want to add to database so show modal to add project details
+  function handleProjectDelete() {
+    const formData = new FormData();
+    formData.append('projectId', selectedProject.id);
+    formData.append('intent', 'delete-project');
+
+    fetcher.submit(formData, {
+      method: 'POST',
+    })
   }
 
   return (
@@ -178,6 +209,17 @@ export default function Index() {
               </option>
             ))}
           </select>
+
+          <input type="hidden" name="intent" value="delete-project" />
+          <input type="hidden" name="projectId" value={selectedProject.id} />
+          <button
+            type="submit"
+            className="ml-2 px-3 py-2 text-sm text-white bg-red-600 hover:bg-red-700 rounded"
+            disabled={!selectedProject.id}
+            onClick={handleProjectDelete}
+          >
+            🗑 Delete Project
+          </button>
 
           <button
             type="button"
