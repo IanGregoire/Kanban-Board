@@ -18,9 +18,15 @@ export default function TaskModal({ task, columns, onClose, mode }: Props) {
   const [title, setTitle] = useState(task?.title ?? '');
   const [description, setDescription] = useState(task?.description ?? '');
   const [columnId, setColumnId] = useState(task?.column_id ?? columns[0]?.id ?? 1);
-  const [startDate, setStartDate] = useState(task?.start_date?.split('T')[0] ?? '');
-  const [endDate, setEndDate] = useState(task?.end_date?.split('T')[0] ?? '');
+  // const [startDate, setStartDate] = useState(task?.start_date?.split('T')[0] ?? '');
+  // const [endDate, setEndDate] = useState(task?.end_date?.split('T')[0] ?? '');
   const fetcher = useFetcher();
+
+  const today = new Date().toISOString().split("T")[0];
+
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(today); 
+
 
   const start_date = startDate ? `${startDate}T00:00:00` : null;
   const end_date = endDate ? `${endDate}T00:00:00` : null;
@@ -42,6 +48,18 @@ export default function TaskModal({ task, columns, onClose, mode }: Props) {
     fetcher.submit(formData, {
       method: "POST",
     });
+    onClose();
+  }
+
+  function handleDelete() {
+    const formData = new FormData();
+    formData.append('id', task!.id.toString());
+    formData.append('intent', 'delete');
+
+    fetcher.submit(formData, {
+      method: 'POST',
+    })
+
     onClose();
   }
 
@@ -99,6 +117,12 @@ export default function TaskModal({ task, columns, onClose, mode }: Props) {
           </div>
 
           <div className="flex justify-end space-x-2 mt-4">
+            <button
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              onClick={handleDelete}
+            >
+              Delete
+            </button>
             <button
               className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white rounded"
               onClick={onClose}

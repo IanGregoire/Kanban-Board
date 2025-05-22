@@ -51,18 +51,30 @@ export async function action({ request }: ActionFunctionArgs) {
   // const supabase = getSupabaseClient(); just using server works
   const formData = await request.formData();
 
+  const intent = formData.get('intent');
   const mode = formData.get('mode');
   const today = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
 
-  // const id = formData.get("id") as string;
+  const id = formData.get("id") as string;
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
   const column_id = Number(formData.get("column_id"));
+
   // Use today's date as fallback
-  const start_date = formData.get("start_date") || today;
+  const start_date = formData.get("start_date") || today; // before || today was as string || null
   const end_date = formData.get("end_date") || today; // Optional — you could also default to today if needed
-  // const start_date = formData.get("start_date") as string | null;
-  // const end_date = formData.get("end_date") as string | null;
+
+  if(intent === 'delete') {
+    if(!id) return json({ error: 'Task ID is required' }, { status: 400 });
+
+    const { error } = await supabase.from('tasks').delete().eq('id', id);
+    if(error) {
+      console.error(error);
+      return json({ error: "Failed to delete task" }, { status: 500});
+    }
+
+    return redirect('/');
+  }
 
   if (!title || !column_id) {
     return json({ error: "Missing fields" }, { status: 400 });
@@ -78,8 +90,8 @@ export async function action({ request }: ActionFunctionArgs) {
   .limit(1);
 
   if (maxError) {
-  console.error("Failed to fetch max position:", maxError);
-  return json({ error: "Could not determine position" }, { status: 500 });
+    console.error("Failed to fetch max position:", maxError);
+    return json({ error: "Could not determine position" }, { status: 500 });
   }
 
   const nextPosition = maxData?.[0]?.position != null ? maxData[0].position + 1 : 0;
