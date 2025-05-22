@@ -6,6 +6,8 @@ import Column from "~/components/Column";
 import TaskModal from "~/components/TaskModal";
 import { json, redirect  } from "@remix-run/node";
 import ProjectModal from "~/components/ProjectModal";
+import TopBar from "~/components/TopBar";
+import DeleteConfirmation from "~/components/DeleteConfirmation";
 
 type Column = {
   id: number;
@@ -139,7 +141,6 @@ export async function action({ request }: ActionFunctionArgs) {
     return json({ error: "Missing fields" }, { status: 400 });
   }
 
-  console.log("Task Mode:", mode);
   // Get the max position in the column
   const { data: maxData, error: maxError } = await supabase
   .from("tasks")
@@ -147,14 +148,15 @@ export async function action({ request }: ActionFunctionArgs) {
   .eq("column_id", column_id)
   .order("position", { ascending: false })
   .limit(1);
-
+  
   if (maxError) {
     console.error("Failed to fetch max position:", maxError);
     return json({ error: "Could not determine position" }, { status: 500 });
   }
-
+  
   const nextPosition = maxData?.[0]?.position != null ? maxData[0].position + 1 : 0;
-
+  
+  console.log("Task Mode:", mode);
 
   if(mode === 'edit') {
     const id = formData.get("id") as string;
@@ -200,47 +202,21 @@ export default function Index() {
   return (
     <div>
       <div className="flex items-center justify-between gap-12 p-6 bg-gray-900 text-white">
-        <Form method="get" className="flex items-center gap-3">
-          <select
-            className="bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white"
-            name="projectId"
-            defaultValue={selectedProject.id}
-            onChange={(e) => e.currentTarget.form?.requestSubmit()}
-          >
-            {projects.map((project: any) => (
-              <option key={project.id} value={project.id}>
-                {project.name}
-              </option>
-            ))}
-          </select>
-
-          <input type="hidden" name="intent" value="delete-project" />
-          <input type="hidden" name="projectId" value={selectedProject.id} />
-          <button
-            type="submit"
-            className="ml-2 px-3 py-2 text-sm text-white bg-red-600 hover:bg-red-700 rounded"
-            disabled={!selectedProject.id}
-            onClick={() => setShowDeleteModal(true)}
-          >
-            🗑 Delete Project
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setShowProjectModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded"
-          >
-            + Add Project
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setShowNewTaskModal(true)}
-            className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-3 py-2 rounded"
-          >
-            + Add Task
-          </button>
-        </Form>
+        <TopBar 
+          selectedProjectId={selectedProject.id} 
+          projects={projects} 
+          setShowDeleteModal={() => {
+            setShowDeleteModal(true);
+            return true;
+          }}
+          setShowProjectModal={() => {
+            setShowProjectModal(true);
+            return true;
+          }}
+          setShowNewTaskModal={() => {
+            setShowNewTaskModal(true);
+            return true;
+          }} />/
       </div>
       <div className="flex justify-center gap-6 p-6">
         {columns.map((column: any) => (
@@ -276,35 +252,14 @@ export default function Index() {
         <ProjectModal onClose={() => setShowProjectModal(false)}/>
       )}
       {showDeleteModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Delete Project
-            </h2>
-            <p className="text-sm text-gray-700 dark:text-gray-300 mb-6">
-              Are you sure you want to delete this project? All associated tasks will also be deleted. This action cannot be undone.
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 text-sm bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-white rounded hover:bg-gray-400 dark:hover:bg-gray-600"
-              >
-                Cancel
-              </button>
-              <Form method="post">
-                <input type="hidden" name="intent" value="delete-project" />
-                <input type="hidden" name="projectId" value={selectedProject.id} />
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700"
-                  onClick={handleProjectDelete}
-                >
-                  Yes, Delete
-                </button>
-              </Form>
-            </div>
-          </div>
-        </div>
+        <DeleteConfirmation 
+          selectedProjectId={selectedProject.id} 
+          setShowDeleteModal={() => {
+            setShowDeleteModal(false);
+            return true;
+          }} 
+          handleProjectDelete={handleProjectDelete}
+        />
       )}
       </div>
     </div>

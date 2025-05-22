@@ -89,13 +89,15 @@ export default function TaskModal({ task, selectedProjectId, columns, onClose, m
 
             <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">Column</label>
             <select
+              name='column_id'
               className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
+              defaultValue={task?.column_id ?? columns[0]?.id}
               value={columnId}
               onChange={(e) => setColumnId(Number(e.target.value))}
               >
-              {columns.map((col) => (
-                <option key={col.id} value={col.id}>
-                  {col.title}
+              {columns.map((column) => (
+                <option key={column.id} value={column.id}>
+                  {column.title}
                 </option>
               ))}
             </select>
