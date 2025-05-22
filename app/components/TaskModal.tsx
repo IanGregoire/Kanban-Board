@@ -8,17 +8,18 @@ type Column = {
 };
 
 type Props = {
-  task: Task;
+  task?: Task;  // Optional for new task
   columns: Column[];
   onClose: () => void;
+  mode: 'create' | 'edit';
 };
 
-export default function TaskModal({ task, columns, onClose }: Props) {
-  const [title, setTitle] = useState(task.title);
-  const [description, setDescription] = useState(task.description);
-  const [columnId, setColumnId] = useState(task.column_id);
-  const [startDate, setStartDate] = useState(task.start_date?.split('T')[0] || '');
-  const [endDate, setEndDate] = useState(task.end_date?.split('T')[0] || '');
+export default function TaskModal({ task, columns, onClose, mode }: Props) {
+  const [title, setTitle] = useState(task?.title ?? '');
+  const [description, setDescription] = useState(task?.description ?? '');
+  const [columnId, setColumnId] = useState(task?.column_id ?? columns[0]?.id ?? 1);
+  const [startDate, setStartDate] = useState(task?.start_date?.split('T')[0] ?? '');
+  const [endDate, setEndDate] = useState(task?.end_date?.split('T')[0] ?? '');
   const fetcher = useFetcher();
 
   const start_date = startDate ? `${startDate}T00:00:00` : null;
@@ -27,7 +28,11 @@ export default function TaskModal({ task, columns, onClose }: Props) {
 
   function handleSave() {
     const formData = new FormData();
-    formData.append("id", task.id.toString());
+    formData.append('mode', mode);
+    if(mode === 'edit') {
+      formData.append('id', task!.id.toString());
+    }
+    // formData.append("id", task.id.toString());
     formData.append("title", title);
     formData.append("description", description);
     formData.append("column_id", columnId.toString());
