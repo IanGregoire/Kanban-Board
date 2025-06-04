@@ -35,12 +35,14 @@ export default function TaskModal({ task, selectedProjectId, columns, onClose, m
     const formData = new FormData();
     formData.append('mode', mode);
     if(mode === 'edit') {
+      console.log("Column: ", columnId)
       formData.append('id', task!.id.toString());
     }
     if(mode === 'create') {
       console.log("Selected Project", selectedProjectId);
       formData.append('project_id', selectedProjectId!);
     }
+
     // formData.append("id", task.id.toString());
     formData.append("title", title);
     formData.append("description", description);
@@ -92,7 +94,7 @@ export default function TaskModal({ task, selectedProjectId, columns, onClose, m
               name='column_id'
               className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
               defaultValue={task?.column_id ?? columns[0]?.id}
-              value={columnId}
+              // value={columnId}
               onChange={(e) => setColumnId(Number(e.target.value))}
               >
               {columns.map((column) => (

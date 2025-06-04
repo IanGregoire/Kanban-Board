@@ -137,7 +137,8 @@ export async function action({ request }: ActionFunctionArgs) {
     return redirect('/');
   }
 
-  if (!title || !column_id || !project_id) {
+  if (!title ||  !column_id) { // Including !project_id fails check
+    console.log('Title check')
     return json({ error: "Missing fields" }, { status: 400 });
   }
 
