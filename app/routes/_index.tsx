@@ -223,7 +223,7 @@ export default function Index() {
         {columns.map((column: any) => (
           <div key={column.id} className="w-72 min-h-[300px] bg-gray-100 dark:bg-gray-800 p-4 rounded-xl shadow-lg">
             <h3 className="text-center font-semibold text-lg mb-4">{column.title}</h3>
-            <ul className="space-y-4">
+            <ul className="space-y-4 max-h-[500px] overflow-y-auto scrollbar-hide">
             {tasks
             .filter((task: Task) => task.column_id === column.id)
             .map((task: Task) => (
