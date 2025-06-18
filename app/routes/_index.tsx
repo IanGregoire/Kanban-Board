@@ -27,6 +27,12 @@ export type Task = {
 
 // Loader to fetch initial data
 export const loader: LoaderFunction = async({ request }) => {
+  const session = await supabase.auth.getSession();
+
+  if (!session.data.session) {
+    return redirect("/login");
+  }
+  
   try {
     const url = new URL(request.url);
     const projectIdFromUrl = url.searchParams.get("projectId");
@@ -266,4 +272,3 @@ export default function Index() {
     </div>
   );
 }
-

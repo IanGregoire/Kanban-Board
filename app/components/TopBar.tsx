@@ -10,6 +10,7 @@ interface TopBarProps {
 
 export default function TopBar({selectedProjectId, projects, setShowDeleteModal, setShowProjectModal, setShowNewTaskModal}: TopBarProps) {
     return (
+      <>
         <Form method="get" className="flex items-center gap-3">
           <select
             className="bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white"
@@ -51,5 +52,9 @@ export default function TopBar({selectedProjectId, projects, setShowDeleteModal,
             + Add Task
           </button>
         </Form>
+        <Form method="post" action="/logout">
+          <button type="submit" className="text-sm text-white">Logout</button>
+        </Form>
+      </>
     )
 }
