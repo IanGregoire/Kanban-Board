@@ -217,7 +217,7 @@ export default function Index() {
           setShowNewTaskModal={() => {
             setShowNewTaskModal(true);
             return true;
-          }} />/
+          }} />
       </div>
       <div className="flex justify-center gap-6 p-6">
         {columns.map((column: any) => (
