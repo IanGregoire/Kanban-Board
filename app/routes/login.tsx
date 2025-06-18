@@ -22,8 +22,8 @@ export default function Login() {
     return (
     <Form method="post" className="max-w-md mx-auto p-6 space-y-4">
       <h2 className="text-xl font-bold">Login</h2>
-      <input name="email" type="email" placeholder="Email" required className="w-full border p-2" />
-      <input name="password" type="password" placeholder="Password" required className="w-full border p-2" />
+      <input name="email" type="email" placeholder="Email" required className="w-full border p-2 text-black" />
+      <input name="password" type="password" placeholder="Password" required className="w-full border p-2 text-black" />
       <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">Login</button>
       {actionData?.error && <p className="text-red-500">{actionData.error}</p>}
     </Form>
