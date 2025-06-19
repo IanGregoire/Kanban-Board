@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ActionFunctionArgs, LoaderFunction } from "@remix-run/node";
-import { Form, useFetcher, useLoaderData } from "@remix-run/react";
-import { supabase } from "~/utils/supabase.server"; // Server-side client
+import { useFetcher, useLoaderData } from "@remix-run/react";
+import { supabase, requireUser } from "~/utils/supabase.server"; // Server-side client
 import Column from "~/components/Column";
 import TaskModal from "~/components/TaskModal";
 import { json, redirect  } from "@remix-run/node";
@@ -28,6 +28,7 @@ export type Task = {
 // Loader to fetch initial data
 export const loader: LoaderFunction = async({ request }) => {
   const session = await supabase.auth.getSession();
+  const user = await requireUser(request);
 
   if (!session.data.session) {
     return redirect("/login");
@@ -38,8 +39,9 @@ export const loader: LoaderFunction = async({ request }) => {
     const projectIdFromUrl = url.searchParams.get("projectId");
 
     const { data: projects, error: projectError } = await supabase
-    .from('projects')
-    .select('*')
+    .from("projects")
+    .select("*")
+    .eq("user_id", user.id)
     .order('id');
     
     if(projectError) throw new Error(`Projects fetch error: ${projectError.message}`);
@@ -73,6 +75,9 @@ export const loader: LoaderFunction = async({ request }) => {
 };
 
 export async function action({ request }: ActionFunctionArgs) {
+  const user = await requireUser(request);
+  if (!user) throw new Error("Not authenticated");
+
   const formData = await request.formData();
 
   const intent = formData.get('intent');
@@ -98,7 +103,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
     const { error } = await supabase
       .from('projects')
-      .insert({ name });
+      .insert({ name, user_id: user.id, });
 
     if(error) {
       console.error('Supabase error:', error.message);
