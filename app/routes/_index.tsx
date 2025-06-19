@@ -38,14 +38,27 @@ export const loader: LoaderFunction = async({ request }) => {
     const url = new URL(request.url);
     const projectIdFromUrl = url.searchParams.get("projectId");
 
-    const { data: projects, error: projectError } = await supabase
+    let { data: projects, error: projectError } = await supabase
     .from("projects")
     .select("*")
     .eq("user_id", user.id)
     .order('id');
     
     if(projectError) throw new Error(`Projects fetch error: ${projectError.message}`);
-    if (!projects || projects.length === 0) throw new Error("No projects found");
+      
+    if (!projects || projects.length === 0) {
+      const { data: insertedProjects, error: insertError } = await supabase
+        .from('projects')
+        .insert({ name: 'First Project', user_id: user.id})
+        .select();
+
+        if(insertError) {
+          console.error('Failed to create starter project: ', insertError.message);
+          throw new Response("Failed to create starter project", { status: 500 });
+        }
+
+        projects = insertedProjects;
+    }
 
     // Determine selected project
     const selectedProject =
