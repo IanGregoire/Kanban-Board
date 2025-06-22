@@ -45,7 +45,7 @@ export const loader: LoaderFunction = async({ request }) => {
     .order('id');
     
     if(projectError) throw new Error(`Projects fetch error: ${projectError.message}`);
-      
+
     if (!projects || projects.length === 0) {
       const { data: insertedProjects, error: insertError } = await supabase
         .from('projects')
@@ -191,6 +191,7 @@ export async function action({ request }: ActionFunctionArgs) {
       .eq("id", Number(id)).select();
     
     if (error) return json({ error: "Update failed" }, { status: 500 });
+    return redirect("/");
   } else {
     const { error } = await supabase
       .from("tasks")
