@@ -1,4 +1,5 @@
 import { Form } from "@remix-run/react";
+import { Link } from '@remix-run/react';
 
 interface TopBarProps {
     selectedProjectId: number;
@@ -52,10 +53,16 @@ export default function TopBar({selectedProjectId, projects, setShowDeleteModal,
             + Add Task
           </button>
         </Form>
+        <Link
+          to='/settings'
+          className="ml-auto bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium px-3 py-2 rounded"
+        >
+          ⚙️ Settings
+        </Link>
         <Form method="post" action="/logout">
           <button 
             type="submit" 
-            className="px-3 py-2 ml-2 text-sm text-white font-medium bg-red-500 hover:bg-red-800 rounded"
+            className="ml-auto px-3 py-2 ml-2 text-sm text-white font-medium bg-red-500 hover:bg-red-800 rounded"
           >
             Logout
           </button>
