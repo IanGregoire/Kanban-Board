@@ -53,7 +53,12 @@ export default function TopBar({selectedProjectId, projects, setShowDeleteModal,
           </button>
         </Form>
         <Form method="post" action="/logout">
-          <button type="submit" className="text-sm text-white">Logout</button>
+          <button 
+            type="submit" 
+            className="px-3 py-2 ml-2 text-sm text-white font-medium bg-red-500 hover:bg-red-800 rounded"
+          >
+            Logout
+          </button>
         </Form>
       </>
     )
