@@ -80,7 +80,7 @@ export const loader: LoaderFunction = async({ request }) => {
 
 
 
-    return json({ projects, selectedProject, columns, tasks});
+    return json({ projects, selectedProject, columns, tasks, email: user.email});
   } catch(error: any) {
     console.error('Loader Error:', error.message);
     throw new Response(error.message, { status: 500 });
@@ -205,7 +205,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function Index() {
-  const { projects, selectedProject , columns, tasks } = useLoaderData<typeof loader>();
+  const { projects, selectedProject , columns, tasks, email } = useLoaderData<typeof loader>();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showNewtaskModal, setShowNewTaskModal] = useState(false);
   const [showProjectModal, setShowProjectModal] = useState(false);
@@ -227,8 +227,9 @@ export default function Index() {
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-12 p-6 bg-gray-900 text-white">
+      <div>
         <TopBar 
+          email={email}
           selectedProjectId={selectedProject.id} 
           projects={projects} 
           setShowDeleteModal={() => {

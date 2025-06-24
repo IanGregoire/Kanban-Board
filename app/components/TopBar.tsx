@@ -2,6 +2,7 @@ import { Form } from "@remix-run/react";
 import { Link } from '@remix-run/react';
 
 interface TopBarProps {
+    email: string;
     selectedProjectId: number;
     projects: any[];
     setShowDeleteModal: () => boolean;
@@ -9,9 +10,9 @@ interface TopBarProps {
     setShowNewTaskModal: () => boolean;
 }
 
-export default function TopBar({selectedProjectId, projects, setShowDeleteModal, setShowProjectModal, setShowNewTaskModal}: TopBarProps) {
+export default function TopBar({email, selectedProjectId, projects, setShowDeleteModal, setShowProjectModal, setShowNewTaskModal}: TopBarProps) {
     return (
-      <>
+      <div className="flex justify-between items-center px-6 py-4 bg-gray-900 text-white">
         <Form method="get" className="flex items-center gap-3">
           <select
             className="bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white"
@@ -53,20 +54,26 @@ export default function TopBar({selectedProjectId, projects, setShowDeleteModal,
             + Add Task
           </button>
         </Form>
-        <Link
-          to='/settings'
-          className="ml-auto bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium px-3 py-2 rounded"
-        >
-          ⚙️ Settings
-        </Link>
-        <Form method="post" action="/logout">
-          <button 
-            type="submit" 
-            className="ml-auto px-3 py-2 ml-2 text-sm text-white font-medium bg-red-500 hover:bg-red-800 rounded"
+
+        <div className="flex items-center gap-3">
+          <p className="text-sm text-gray-300"> User: {email} </p>
+          
+          <Link
+            to='/settings'
+            className="px-3 py-2 text-sm text-white font-medium bg-gray-700 hover:bg-gray-600 rounded"
           >
-            Logout
-          </button>
-        </Form>
-      </>
+            ⚙️ Settings
+          </Link>
+
+          <Form method="post" action="/logout">
+            <button 
+              type="submit" 
+              className="px-3 py-2 ml-2 text-sm text-white font-medium bg-red-500 hover:bg-red-800 rounded"
+            >
+              Logout
+            </button>
+          </Form>
+        </div>
+      </div>
     )
 }

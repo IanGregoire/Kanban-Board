@@ -1,10 +1,10 @@
 import { json, redirect, type LoaderFunction, type ActionFunction } from '@remix-run/node';
-import { useActionData, Form } from '@remix-run/react';
+import { useActionData, useLoaderData, Form } from '@remix-run/react';
 import { supabase, requireUser } from '~/utils/supabase.server';
 
 export const loader: LoaderFunction = async({ request }) => {
-    await requireUser(request); // Redirect if not logged in
-    return json({});
+    const user = await requireUser(request); // Redirect if not logged in
+    return json({ email: user.email });
 }
 
 export const action: ActionFunction = async({ request }) => {
@@ -37,10 +37,12 @@ export const action: ActionFunction = async({ request }) => {
 
 export default function Settings() {
     const actionData = useActionData<typeof action>();
+    const { email } = useLoaderData<typeof loader>();
 
     return (
         <div className="max-w-lg mx-auto mt-10 p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
             <h1 className="text-2xl font-bold mb-6 text-center">User Settings</h1>
+            <p className="text-white">Current email is: { email }</p>
 
             <Form method="post" className="space-y-4 mb-8">
                 <input type="hidden" name="intent" value="update-email" />
