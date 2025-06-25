@@ -19,6 +19,8 @@ export type Task = {
   id: number;
   title: string;
   description: string;
+  git_branch: string;
+  git_commit: string;
   column_id: number;
   position: number;
   start_date: string;
@@ -100,6 +102,8 @@ export async function action({ request }: ActionFunctionArgs) {
   const id = formData.get("id") as string;
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
+  const git_branch = formData.get("git_branch") as string | null;
+  const git_commit = formData.get("git_commit") as string | null;
   const column_id = Number(formData.get("column_id"));
   const project_id = formData.get("project_id") as string;
 
@@ -185,17 +189,25 @@ export async function action({ request }: ActionFunctionArgs) {
 
   if(mode === 'edit') {
     const id = formData.get("id") as string;
+
     const { error } = await supabase
       .from('tasks')
-      .update({ title, description, column_id, start_date, end_date })
-      .eq("id", Number(id)).select();
+      .update({ title, description, git_branch, git_commit, column_id, start_date, end_date })
+      .eq("id", Number(id))
+      .select();
     
-    if (error) return json({ error: "Update failed" }, { status: 500 });
+    if (error) {
+      console.log("What the helly" + error.message)
+      return json({ error: "Update failed" }, { status: 500 });
+    }
+    else {
+      console.log("Task updated successfully");
+    }
     return redirect("/");
   } else {
     const { error } = await supabase
       .from("tasks")
-      .insert([{ title, description, column_id, start_date, end_date, project_id, position: nextPosition}])
+      .insert([{ title, description, git_branch, git_commit, column_id, start_date, end_date, project_id, position: nextPosition}])
       .select();
 
     if (error) return json({ error: "Create failed" }, { status: 500 });

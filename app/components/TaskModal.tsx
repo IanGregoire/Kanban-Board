@@ -19,36 +19,32 @@ export default function TaskModal({ task, selectedProjectId, columns, onClose, m
   const [title, setTitle] = useState(task?.title ?? '');
   const [description, setDescription] = useState(task?.description ?? '');
   const [columnId, setColumnId] = useState(task?.column_id ?? columns[0]?.id ?? 1);
+  const [gitBranch, setGitBranch] = useState(task?.git_branch ?? '');
+  const [gitCommit, setGitCommit] = useState(task?.git_commit ?? '');
   const fetcher = useFetcher();
 
   const today = new Date().toISOString().split("T")[0];
 
-  const [startDate, setStartDate] = useState(today);
-  const [endDate, setEndDate] = useState(today); 
-
-
-  const start_date = startDate ? `${startDate}T00:00:00` : null;
-  const end_date = endDate ? `${endDate}T00:00:00` : null;
-
+  const [startDate, setStartDate] = useState(task?.start_date ?? today);
+  const [endDate, setEndDate] = useState(task?.end_date ?? today); 
 
   function handleSave() {
     const formData = new FormData();
     formData.append('mode', mode);
     if(mode === 'edit') {
-      console.log("Column: ", columnId)
       formData.append('id', task!.id.toString());
     }
     if(mode === 'create') {
-      console.log("Selected Project", selectedProjectId);
       formData.append('project_id', selectedProjectId!);
     }
 
-    // formData.append("id", task.id.toString());
     formData.append("title", title);
     formData.append("description", description);
+    formData.append("git_branch", gitBranch);
+    formData.append("git_commit", gitCommit);
     formData.append("column_id", columnId.toString());
-    formData.append("start_date", start_date ?? "");
-    formData.append("end_date", end_date ?? "");
+    formData.append("start_date", startDate);
+    formData.append("end_date", endDate);
 
     fetcher.submit(formData, {
       method: "POST",
@@ -80,21 +76,34 @@ export default function TaskModal({ task, selectedProjectId, columns, onClose, m
               className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              />
+            />
 
             <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">Description</label>
             <textarea
               className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              />
+            />
+
+            <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">Git Branch</label>
+            <input
+              className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
+              value={gitBranch}
+              onChange={(e) => setGitBranch(e.target.value)}
+            />
+
+            <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">Git Commit</label>
+            <input
+              className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
+              value={gitCommit}
+              onChange={(e) => setGitCommit(e.target.value)}
+            />
 
             <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">Column</label>
             <select
               name='column_id'
               className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
               defaultValue={task?.column_id ?? columns[0]?.id}
-              // value={columnId}
               onChange={(e) => setColumnId(Number(e.target.value))}
               >
               {columns.map((column) => (
@@ -108,19 +117,17 @@ export default function TaskModal({ task, selectedProjectId, columns, onClose, m
             <input
               type="date"
               className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
-              // value={task.start_date ? task.start_date.split('T')[0] : ''}
-              value={startDate ?? ''}
+              value={task?.start_date}
               onChange={(e) => setStartDate(e.target.value)}
-              />
+            />
 
             <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">End Date</label>
             <input
               type="date"
               className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
-              // value={task.end_date ? task.end_date.split('T')[0] : ''}
-              value={endDate ?? ''}
+              value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              />
+            />
           </div>
 
           <div className="flex justify-end space-x-2 mt-4">
@@ -133,13 +140,13 @@ export default function TaskModal({ task, selectedProjectId, columns, onClose, m
             <button
               className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white rounded"
               onClick={onClose}
-              >
+            >
               Cancel
             </button>
             <button
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               onClick={handleSave}
-              >
+            >
               Save
             </button>
           </div>
