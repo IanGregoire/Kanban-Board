@@ -3,7 +3,7 @@ import { ActionFunctionArgs, LoaderFunction } from "@remix-run/node";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import { supabase, requireUser } from "~/utils/supabase.server"; // Server-side client
 import Column from "~/components/Column";
-import TaskModal from "~/components/TaskModal";
+import TaskModal, { Label } from "~/components/TaskModal";
 import { json, redirect  } from "@remix-run/node";
 import ProjectModal from "~/components/ProjectModal";
 import TopBar from "~/components/TopBar";
@@ -25,6 +25,7 @@ export type Task = {
   position: number;
   start_date: string;
   end_date: string;
+  labels: Label[];
 }
 
 // Loader to fetch initial data
@@ -75,14 +76,26 @@ export const loader: LoaderFunction = async({ request }) => {
 
     const { data: tasks, error: taskError } = await supabase
     .from('tasks')
-    .select('*')
+    .select("*, task_labels(label_id, labels(id, name, color))")
     .eq("project_id", selectedProject.id);
 
     if(taskError) throw new Error(`Tasks fetch error: ${taskError.message}`);
 
+    const { data: labels } = await supabase
+    .from('labels')
+    .select('*')
+
+    const { data: taskLabels } = await supabase
+    .from('task_labels')
+    .select('task_id, label_id');
+
+    const tasksWithLabels = tasks?.map((task) => ({
+      ...task,
+      labels: task.task_labels.map((tl: any) => tl.labels),
+    }));
 
 
-    return json({ projects, selectedProject, columns, tasks, email: user.email});
+    return json({ projects, selectedProject, columns, tasks: tasksWithLabels, email: user.email, labels, taskLabels});
   } catch(error: any) {
     console.error('Loader Error:', error.message);
     throw new Response(error.message, { status: 500 });
@@ -106,6 +119,8 @@ export async function action({ request }: ActionFunctionArgs) {
   const git_commit = formData.get("git_commit") as string | null;
   const column_id = Number(formData.get("column_id"));
   const project_id = formData.get("project_id") as string;
+
+  const labelIds = formData.getAll("labels") as string[];
 
   // Use today's date as fallback
   const start_date = formData.get("start_date") || today; // before || today was as string || null
@@ -190,6 +205,11 @@ export async function action({ request }: ActionFunctionArgs) {
   if(mode === 'edit') {
     const id = formData.get("id") as string;
 
+    await supabase
+    .from('task_labels')
+    .delete()
+    .eq('task_id', id);
+
     const { error } = await supabase
       .from('tasks')
       .update({ title, description, git_branch, git_commit, column_id, start_date, end_date })
@@ -197,27 +217,43 @@ export async function action({ request }: ActionFunctionArgs) {
       .select();
     
     if (error) {
-      console.log("What the helly" + error.message)
       return json({ error: "Update failed" }, { status: 500 });
     }
-    else {
-      console.log("Task updated successfully");
+    
+    if (labelIds.length > 0) {
+      const labelLinks = labelIds.map((labelId) => ({
+        task_id: Number(id),
+        label_id: Number(labelId),
+      }));
+
+      await supabase.from('task_labels').insert(labelLinks).select();
     }
+
     return redirect("/");
   } else {
-    const { error } = await supabase
+    const { data: newTasks, error } = await supabase
       .from("tasks")
       .insert([{ title, description, git_branch, git_commit, column_id, start_date, end_date, project_id, position: nextPosition}])
       .select();
 
     if (error) return json({ error: "Create failed" }, { status: 500 });
+
+    const newTaskId = newTasks?.[0]?.id;
+
+    if(newTaskId && labelIds.length > 0) {
+      const labelLinks = labelIds.map((labelId) => ({
+        task_id: newTaskId,
+        label_id: Number(labelId),
+      }))
+      await supabase.from('task_labels').insert(labelLinks).select;
+    }
   }
 
   return redirect("/"); // Reload page to show updated tasks Doesn't work currently
 }
 
 export default function Index() {
-  const { projects, selectedProject , columns, tasks, email } = useLoaderData<typeof loader>();
+  const { projects, selectedProject , columns, tasks, email, labels, taskLabels } = useLoaderData<typeof loader>();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showNewtaskModal, setShowNewTaskModal] = useState(false);
   const [showProjectModal, setShowProjectModal] = useState(false);
@@ -275,6 +311,7 @@ export default function Index() {
         <TaskModal
           task={selectedTask}
           columns={columns}
+          labels={labels}
           onClose={() => setSelectedTask(null)}
           mode='edit'
         />
@@ -282,6 +319,7 @@ export default function Index() {
       {showNewtaskModal && (
         <TaskModal
           columns={columns}
+          labels={labels}
           selectedProjectId={selectedProject.id}
           onClose={() => setShowNewTaskModal(false)}
           mode='create'

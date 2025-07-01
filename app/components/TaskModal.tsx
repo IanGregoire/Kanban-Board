@@ -7,20 +7,31 @@ type Column = {
   title: string;
 };
 
+export type Label = {
+  id: number;
+  name: string;
+  color: string;
+}
+
 type Props = {
   task?: Task;  // Optional for new task
   selectedProjectId?: string;
   columns: Column[];
+  labels: Label[];
   onClose: () => void;
   mode: 'create' | 'edit';
 };
 
-export default function TaskModal({ task, selectedProjectId, columns, onClose, mode }: Props) {
+export default function TaskModal({ task, selectedProjectId, columns, labels, onClose, mode }: Props) {
   const [title, setTitle] = useState(task?.title ?? '');
   const [description, setDescription] = useState(task?.description ?? '');
   const [columnId, setColumnId] = useState(task?.column_id ?? columns[0]?.id ?? 1);
   const [gitBranch, setGitBranch] = useState(task?.git_branch ?? '');
   const [gitCommit, setGitCommit] = useState(task?.git_commit ?? '');
+  const [selectedLabels, setSelectedLabels] = useState<number[]>(
+  mode === 'edit' ? task?.labels?.map(l => l.id) ?? [] : []
+);
+
   const fetcher = useFetcher();
 
   const today = new Date().toISOString().split("T")[0];
@@ -45,6 +56,10 @@ export default function TaskModal({ task, selectedProjectId, columns, onClose, m
     formData.append("column_id", columnId.toString());
     formData.append("start_date", startDate);
     formData.append("end_date", endDate);
+
+    selectedLabels.forEach((labelId) => {
+      formData.append("labels", labelId.toString());
+    });
 
     fetcher.submit(formData, {
       method: "POST",
@@ -71,6 +86,31 @@ export default function TaskModal({ task, selectedProjectId, columns, onClose, m
           <Form method='post'>
 
           <div className="space-y-2">
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
+                Labels
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {labels.map(label => (
+                  <label key={label.id} className="flex items-center space-x-2 text-sm text-white">
+                    <input
+                      type="checkbox"
+                      value={label.id}
+                      checked={selectedLabels.includes(label.id)}
+                      onChange={(e) => {
+                        const id = Number(e.target.value);
+                        setSelectedLabels((prev) =>
+                          e.target.checked ? [...prev, id] : prev.filter((l) => l !== id)
+                        );
+                      }}
+                      className="accent-blue-600"
+                    />
+                    <span>{label.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
             <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">Title</label>
             <input
               className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
