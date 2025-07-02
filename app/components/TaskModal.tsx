@@ -105,7 +105,7 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
                       }}
                       className="accent-blue-600"
                     />
-                    <span>{label.name}</span>
+                    <span style={{ backgroundColor: label.color }}>{label.name}</span>
                   </label>
                 ))}
               </div>

@@ -83,7 +83,7 @@ export const loader: LoaderFunction = async({ request }) => {
 
     const { data: labels } = await supabase
     .from('labels')
-    .select('*')
+    .select('id, name, color')
 
     const { data: taskLabels } = await supabase
     .from('task_labels')
@@ -301,7 +301,7 @@ export default function Index() {
             {tasks
             .filter((task: Task) => task.column_id === column.id)
             .map((task: Task) => (
-              <Column key={task.id} task={task} onClick={setSelectedTask} />
+              <Column key={task.id} task={task} labels={labels} onClick={setSelectedTask} />
             ))}
             </ul>
           </div>
