@@ -11,6 +11,7 @@ export type Label = {
   id: number;
   name: string;
   color: string;
+  category: string;
 }
 
 type Props = {
@@ -29,8 +30,8 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
   const [gitBranch, setGitBranch] = useState(task?.git_branch ?? '');
   const [gitCommit, setGitCommit] = useState(task?.git_commit ?? '');
   const [selectedLabels, setSelectedLabels] = useState<number[]>(
-  mode === 'edit' ? task?.labels?.map(l => l.id) ?? [] : []
-);
+    mode === 'edit' ? task?.labels?.map(l => l.id) ?? [] : []
+  );
 
   const fetcher = useFetcher();
 
@@ -38,6 +39,21 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
 
   const [startDate, setStartDate] = useState(task?.start_date ?? today);
   const [endDate, setEndDate] = useState(task?.end_date ?? today); 
+
+  // Labels enforce one per category
+  const groupedLabels = labels.reduce((acc, label) => {
+    if(!acc[label.category]) acc[label.category] = [];
+    acc[label.category].push(label);
+    return acc;
+  }, {} as Record<string, Label[]>);
+
+  function toggleCategoryLabel(category: string, labelId: number) {
+  const otherLabels = labels
+    .filter(l => l.category === category && selectedLabels.includes(l.id));
+  const newSelected = selectedLabels.filter(id => !otherLabels.some(l => l.id === id));
+
+  setSelectedLabels([...newSelected, labelId]);
+}
 
   function handleSave() {
     const formData = new FormData();
@@ -91,23 +107,23 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
                 Labels
               </label>
               <div className="flex flex-wrap gap-2">
-                {labels.map(label => (
-                  <label key={label.id} className="flex items-center space-x-2 text-sm text-white">
-                    <input
-                      type="checkbox"
-                      value={label.id}
-                      checked={selectedLabels.includes(label.id)}
-                      onChange={(e) => {
-                        const id = Number(e.target.value);
-                        setSelectedLabels((prev) =>
-                          e.target.checked ? [...prev, id] : prev.filter((l) => l !== id)
-                        );
-                      }}
-                      className="accent-blue-600"
-                    />
-                    <span style={{ backgroundColor: label.color }}>{label.name}</span>
-                  </label>
-                ))}
+                 {Object.entries(groupedLabels).map(([category, labels]) => (
+                    <div key={category}>
+                      <p className="text-sm font-semibold">{category}</p>
+                      {labels.map(label => (
+                        <label key={label.id} className="inline-flex items-center space-x-1 mr-2">
+                          <input
+                            type="radio"
+                            name={category}
+                            value={label.id}
+                            checked={selectedLabels.includes(label.id)}
+                            onChange={() => toggleCategoryLabel(category, label.id)}
+                          />
+                          <span className="text-sm" style={{ backgroundColor: label.color }}>{label.name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  ))}
               </div>
             </div>
 

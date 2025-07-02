@@ -83,7 +83,7 @@ export const loader: LoaderFunction = async({ request }) => {
 
     const { data: labels } = await supabase
     .from('labels')
-    .select('id, name, color')
+    .select('id, name, color, category')
 
     const { data: taskLabels } = await supabase
     .from('task_labels')
@@ -125,6 +125,21 @@ export async function action({ request }: ActionFunctionArgs) {
   // Use today's date as fallback
   const start_date = formData.get("start_date") || today; // before || today was as string || null
   const end_date = formData.get("end_date") || today; // Optional — you could also default to today if needed
+
+  // Validate 1 label per category
+  const { data: allLabels } = await supabase.from("labels").select("*");
+  const selected = allLabels!.filter(label => labelIds.includes(label.id.toString()));
+  const categoryCounts = selected.reduce((acc, label) => {
+    acc[label.category] = (acc[label.category] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  for (const [cat, count] of Object.entries(categoryCounts) as [string, number][]) {
+    if (count > 1) {
+      return json({ error: `Only one label allowed in "${cat}" category.` }, { status: 400 });
+    }
+  }
+
 
   if(intent === 'create-project') {
     const name = formData.get('name') as string;
