@@ -1,5 +1,6 @@
 import { Form } from "@remix-run/react";
 import { Link } from '@remix-run/react';
+import { ThemeToggle } from "./themeToggle";
 
 interface TopBarProps {
     email: string;
@@ -73,6 +74,8 @@ export default function TopBar({email, selectedProjectId, projects, setShowDelet
               Logout
             </button>
           </Form>
+
+          {/* <ThemeToggle /> */}
         </div>
       </div>
     )

@@ -8,6 +8,8 @@ import {
 } from "@remix-run/react";
 import { json } from "@remix-run/node";
 import type { LinksFunction, LoaderFunction } from "@remix-run/node";
+import { useEffect } from "react";
+import { useThemeStore } from "./stores/useThemeStore";
 
 import "./tailwind.css";
 
@@ -36,6 +38,13 @@ export const links: LinksFunction = () => [
 
 export default function App() {
   const data = useLoaderData<typeof loader>();
+
+  // const setTheme = useThemeStore((state: any) => state.setTheme);
+
+  // useEffect(() => {
+  //   const stored = (localStorage.getItem('theme') as 'light' | 'dark') || 'light';
+  //   setTheme(stored);
+  // }, [setTheme])
 
   return (
     <html lang="en">
