@@ -7,26 +7,53 @@ type Column = {
   title: string;
 };
 
+export type Label = {
+  id: number;
+  name: string;
+  color: string;
+  category: string;
+}
+
 type Props = {
   task?: Task;  // Optional for new task
   selectedProjectId?: string;
   columns: Column[];
+  labels: Label[];
   onClose: () => void;
   mode: 'create' | 'edit';
 };
 
-export default function TaskModal({ task, selectedProjectId, columns, onClose, mode }: Props) {
+export default function TaskModal({ task, selectedProjectId, columns, labels, onClose, mode }: Props) {
   const [title, setTitle] = useState(task?.title ?? '');
   const [description, setDescription] = useState(task?.description ?? '');
   const [columnId, setColumnId] = useState(task?.column_id ?? columns[0]?.id ?? 1);
   const [gitBranch, setGitBranch] = useState(task?.git_branch ?? '');
   const [gitCommit, setGitCommit] = useState(task?.git_commit ?? '');
+  const [selectedLabels, setSelectedLabels] = useState<number[]>(
+    mode === 'edit' ? task?.labels?.map(l => l.id) ?? [] : []
+  );
+
   const fetcher = useFetcher();
 
   const today = new Date().toISOString().split("T")[0];
 
   const [startDate, setStartDate] = useState(task?.start_date ?? today);
   const [endDate, setEndDate] = useState(task?.end_date ?? today); 
+
+  // Labels enforce one per category
+  const groupedLabels = labels.reduce((acc, label) => {
+    if(!acc[label.category]) acc[label.category] = [];
+    acc[label.category].push(label);
+    return acc;
+  }, {} as Record<string, Label[]>);
+
+  function toggleCategoryLabel(category: string, labelId: number) {
+  const otherLabels = labels
+    .filter(l => l.category === category && selectedLabels.includes(l.id));
+  const newSelected = selectedLabels.filter(id => !otherLabels.some(l => l.id === id));
+
+  setSelectedLabels([...newSelected, labelId]);
+}
 
   function handleSave() {
     const formData = new FormData();
@@ -45,6 +72,10 @@ export default function TaskModal({ task, selectedProjectId, columns, onClose, m
     formData.append("column_id", columnId.toString());
     formData.append("start_date", startDate);
     formData.append("end_date", endDate);
+
+    selectedLabels.forEach((labelId) => {
+      formData.append("labels", labelId.toString());
+    });
 
     fetcher.submit(formData, {
       method: "POST",
@@ -71,6 +102,31 @@ export default function TaskModal({ task, selectedProjectId, columns, onClose, m
           <Form method='post'>
 
           <div className="space-y-2">
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
+                Labels
+              </label>
+              <div className="flex flex-wrap gap-2">
+                 {Object.entries(groupedLabels).map(([category, labels]) => (
+                    <div key={category}>
+                      <p className="text-sm font-semibold">{category}</p>
+                      {labels.map(label => (
+                        <label key={label.id} className="inline-flex items-center space-x-1 mr-2">
+                          <input
+                            type="radio"
+                            name={category}
+                            value={label.id}
+                            checked={selectedLabels.includes(label.id)}
+                            onChange={() => toggleCategoryLabel(category, label.id)}
+                          />
+                          <span className="text-sm" style={{ backgroundColor: label.color }}>{label.name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  ))}
+              </div>
+            </div>
+
             <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">Title</label>
             <input
               className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
