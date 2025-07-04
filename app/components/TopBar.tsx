@@ -13,10 +13,10 @@ interface TopBarProps {
 
 export default function TopBar({email, selectedProjectId, projects, setShowDeleteModal, setShowProjectModal, setShowNewTaskModal}: TopBarProps) {
     return (
-      <div className="flex justify-between items-center px-6 py-4 bg-gray-900 text-white">
+      <div className="flex justify-between items-center px-6 py-4 br-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white border-b border-gray-300 dark:border-gray-700">
         <Form method="get" className="flex items-center gap-3">
           <select
-            className="bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white"
+            className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded px-3 py-2 text-gray-900 dark:text-white"
             name="projectId"
             defaultValue={selectedProjectId}
             onChange={(e) => e.currentTarget.form?.requestSubmit()}
@@ -32,7 +32,7 @@ export default function TopBar({email, selectedProjectId, projects, setShowDelet
           <input type="hidden" name="projectId" value={selectedProjectId} />
           <button
             type="submit"
-            className="ml-2 px-3 py-2 text-sm text-white bg-red-600 hover:bg-red-700 rounded"
+            className="px-3 py-2 text-sm text-white bg-red-600 hover:bg-red-700 rounded disabled:opacity-50"
             disabled={!selectedProjectId}
             onClick={() => setShowDeleteModal()}
           >
@@ -57,11 +57,11 @@ export default function TopBar({email, selectedProjectId, projects, setShowDelet
         </Form>
 
         <div className="flex items-center gap-3">
-          <p className="text-sm text-gray-300"> User: {email} </p>
+          <p className="text-sm text-gray-700 dark:text-gray-300"> User: {email} </p>
           
           <Link
             to='/settings'
-            className="px-3 py-2 text-sm text-white font-medium bg-gray-700 hover:bg-gray-600 rounded"
+            className="px-3 py-2 text-sm font-medium bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 rounded"
           >
             ⚙️ Settings
           </Link>
@@ -69,13 +69,13 @@ export default function TopBar({email, selectedProjectId, projects, setShowDelet
           <Form method="post" action="/logout">
             <button 
               type="submit" 
-              className="px-3 py-2 ml-2 text-sm text-white font-medium bg-red-500 hover:bg-red-800 rounded"
+              className="px-3 py-2 ml-2 text-sm font-medium text-white bg-red-500 hover:bg-red-700 rounded"
             >
               Logout
             </button>
           </Form>
 
-          {/* <ThemeToggle /> */}
+          <ThemeToggle />
         </div>
       </div>
     )

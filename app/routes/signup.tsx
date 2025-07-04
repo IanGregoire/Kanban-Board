@@ -22,20 +22,39 @@ export default function SignUp() {
 
     return (
         <div className="max-w-md mx-auto mt-12 p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
-          <h1 className="text-2xl font-bold mb-4 text-center">Sign Up</h1>
+          <h1 className="text-2xl font-bold mb-4 text-center text-gray-900 dark:text-white">Sign Up</h1>
 
           <Form method="post" className="space-y-4">
-            <input name="email" type="email" placeholder="Email" required className="w-full p-2 text-black border rounded" />
-            <input name="password" type="password" placeholder="Password" required className="w-full p-2 text-black border rounded" />
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Email
+            </label>
+            <input
+              name="email"
+              type="email"
+              placeholder="Email"
+              required
+              autoFocus
+              className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+            />
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Password
+            </label>
+            <input
+              name="password"
+              type="password"
+              placeholder="Password"
+              required
+              className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+            />
             {actionData?.error && <p className="text-red-500 text-sm">{actionData.error}</p>}
             <button type="submit" className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700">
                 Sign Up
             </button>
           </Form>
 
-          <p className="mt-4 text-center text-sm">
+          <p className="mt-4 text-center text-sm text-gray-700 dark:text-gray-300">
             Already have an account?{" "}
-            <Link to="/login" className="text-blue-600 hover:underline">Log in</Link>
+            <Link to="/login" className="text-blue-600 hover:underline dark:text-blue-400">Log in</Link>
           </p>
         </div>
     )

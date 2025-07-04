@@ -41,8 +41,10 @@ export default function Settings() {
 
     return (
         <div className="max-w-lg mx-auto mt-10 p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
-            <h1 className="text-2xl font-bold mb-6 text-center">User Settings</h1>
-            <p className="text-white">Current email is: { email }</p>
+            <h1 className="text-2xl font-bold mb-6 text-center text-gray-900 dark:text-white">User Settings</h1>
+             <p className="text-gray-800 dark:text-gray-300 mb-4">
+                Current email: <span className="font-semibold">{email}</span>
+            </p>
 
             <Form method="post" className="space-y-4 mb-8">
                 <input type="hidden" name="intent" value="update-email" />
@@ -51,7 +53,7 @@ export default function Settings() {
                 type="email"
                 name="email"
                 required
-                className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 />
                 <button className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded" type="submit">
                 Update Email
@@ -65,7 +67,7 @@ export default function Settings() {
                 type="password"
                 name="password"
                 required
-                className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 />
                 <button className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded" type="submit">
                 Update Password
@@ -80,7 +82,7 @@ export default function Settings() {
             )}
             <a
                 href="/"
-                className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+                className="block mt-6 text-sm text-blue-600 hover:underline dark:text-blue-400"
             >
                 ← Back to Dashboard
             </a>

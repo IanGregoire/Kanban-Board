@@ -97,7 +97,7 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-full max-w-md space-y-4 shadow-xl">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-full max-w-lg space-y-4 shadow-xl">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Edit Task</h2>
           <Form method='post'>
 
@@ -106,20 +106,21 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
               <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
                 Labels
               </label>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-3">
                  {Object.entries(groupedLabels).map(([category, labels]) => (
                     <div key={category}>
-                      <p className="text-sm font-semibold">{category}</p>
+                      <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">{category}</p>
                       {labels.map(label => (
-                        <label key={label.id} className="inline-flex items-center space-x-1 mr-2">
+                        <label key={label.id} className="inline-flex items-center space-x-1">
                           <input
                             type="radio"
                             name={category}
                             value={label.id}
                             checked={selectedLabels.includes(label.id)}
                             onChange={() => toggleCategoryLabel(category, label.id)}
+                            className="accent-blue-600"
                           />
-                          <span className="text-sm" style={{ backgroundColor: label.color }}>{label.name}</span>
+                          <span className="text-xs px-2 py-1 rounded text-white" style={{ backgroundColor: label.color }}>{label.name}</span>
                         </label>
                       ))}
                     </div>
@@ -129,28 +130,28 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
 
             <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">Title</label>
             <input
-              className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
 
             <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">Description</label>
             <textarea
-              className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
 
             <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">Git Branch</label>
             <input
-              className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
               value={gitBranch}
               onChange={(e) => setGitBranch(e.target.value)}
             />
 
             <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">Git Commit</label>
             <input
-              className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
               value={gitCommit}
               onChange={(e) => setGitCommit(e.target.value)}
             />
@@ -158,7 +159,7 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
             <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">Column</label>
             <select
               name='column_id'
-              className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
               defaultValue={task?.column_id ?? columns[0]?.id}
               onChange={(e) => setColumnId(Number(e.target.value))}
               >
@@ -172,7 +173,7 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
             <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">Start Date</label>
             <input
               type="date"
-              className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
               value={task?.start_date}
               onChange={(e) => setStartDate(e.target.value)}
             />
@@ -180,7 +181,7 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
             <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">End Date</label>
             <input
               type="date"
-              className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
             />
@@ -188,7 +189,7 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
 
           <div className="flex justify-end space-x-2 mt-4">
             <button
-              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
               onClick={handleDelete}
             >
               Delete
@@ -200,7 +201,7 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
               Cancel
             </button>
             <button
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
               onClick={handleSave}
             >
               Save

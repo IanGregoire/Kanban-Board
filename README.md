@@ -54,23 +54,27 @@ A **Kanban Board** built with **Remix** and **Supabase** for real-time task mana
 - 🌎 **Deployable on Vercel, Netlify, or Fly.io**
 
 ### ✅ Core Kanban Functionality
+
 - Create, edit, and delete tasks.
-- Organize tasks into custom columns (e.g., Todo, In Progress, Done). 
+- Organize tasks into custom columns (e.g., Todo, In Progress, Done).
 - Date picker for `start_date` and `end_date` per task.
 - Responsive UI with light/dark mode support.
 
 ### 👥 User Authentication
+
 - Email/password-based login & sign-up.
 - User-specific project and task data.
 - User settings page for updating email and password.
 
 ### 🧪 Project Management
+
 - Create/delete projects.
 - Filter visible tasks based on selected project.
 - Project dropdown selector at the top.
 - Projects scoped per user using Supabase `user_id`.
 
 ### 🧵 Task Labels (NEW!)
+
 - Tasks can be assigned up to **three labels** based on category:
   - Priority: `High`, `Medium`, `Low`
   - Type: `Feature`, `Bug`, `Documentation`
@@ -79,10 +83,12 @@ A **Kanban Board** built with **Remix** and **Supabase** for real-time task mana
 - Enforced label selection logic per category.
 
 ### 🧠 Git Metadata (NEW!)
+
 - Add Git commit and branch metadata to tasks.
 - Helps track development context.
 
 ### 📁 Data Layer
+
 - Supabase with the following schema:
   - `users`: Auth users
   - `projects`: User projects
@@ -92,6 +98,7 @@ A **Kanban Board** built with **Remix** and **Supabase** for real-time task mana
   - `task_labels`: Join table between tasks and labels
 
 ### 🔐 RLS (Row-Level Security)
+
 - Enabled for all tables.
 - Policies ensure users can only access their own projects/tasks/labels.
 
@@ -154,11 +161,11 @@ remix-kanban/
 
 - Deploy to Vercel (What I am using currently deployed at https://kanban-board-pied-iota.vercel.app/login)
 
-  ```bash
-  vercel
-  ```
+```bash
+vercel
+```
 
-  Set environment variables on Vercel dashboard (SUPABASE_URL, SUPABASE_ANON_KEY
+Set environment variables on Vercel dashboard (SUPABASE_URL, SUPABASE_ANON_KEY
 
 - Deploy to Netlify
 
