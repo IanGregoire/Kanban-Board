@@ -10,7 +10,7 @@ interface ThemeStore {
 }
 
 export const useThemeStore = create<ThemeStore>((set) => ({
-  theme: "dark",
+  theme: "light",
   toggleTheme: () => {
     if (typeof window === "undefined") return;
 

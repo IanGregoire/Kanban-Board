@@ -39,12 +39,12 @@ export const links: LinksFunction = () => [
 export default function App() {
   const data = useLoaderData<typeof loader>();
 
-  // const setTheme = useThemeStore((state: any) => state.setTheme);
+  const setTheme = useThemeStore((state: any) => state.setTheme);
 
-  // useEffect(() => {
-  //   const stored = (localStorage.getItem('theme') as 'light' | 'dark') || 'light';
-  //   setTheme(stored);
-  // }, [setTheme])
+  useEffect(() => {
+    const stored = (localStorage.getItem('theme') as 'light' | 'dark') || 'light';
+    setTheme(stored);
+  }, [setTheme])
 
   return (
     <html lang="en">
