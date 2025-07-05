@@ -1,7 +1,6 @@
 import { Form, Link, useActionData } from '@remix-run/react';
 import { json, redirect, type ActionFunction } from '@remix-run/node';
 import { supabase } from '~/utils/supabase.server';
-import { createUserSession } from '~/utils/session.server';
 
 export const action: ActionFunction = async({ request }) => {
     const form = await request.formData();

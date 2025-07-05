@@ -1,6 +1,13 @@
 import { json, redirect, type LoaderFunction, type ActionFunction } from '@remix-run/node';
-import { useActionData, useLoaderData, Form } from '@remix-run/react';
+import { useActionData, useLoaderData, Form, MetaFunction } from '@remix-run/react';
 import { supabase, requireUser } from '~/utils/supabase.server';
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Settings - Kanban Board" },
+    { name: "description", content: "Manage Kanban board account information." },
+  ];
+};
 
 export const loader: LoaderFunction = async({ request }) => {
     const user = await requireUser(request); // Redirect if not logged in

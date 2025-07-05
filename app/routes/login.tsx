@@ -1,6 +1,13 @@
-import { json, redirect, type ActionFunction } from  '@remix-run/node';
+import { json, redirect, type ActionFunction, MetaFunction } from  '@remix-run/node';
 import { Form, Link, useActionData } from '@remix-run/react';
 import { supabase } from '~/utils/supabase.server'; 
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Log In - Kanban Board" },
+    { name: "description", content: "Log in to manage your projects with the Kanban board." },
+  ];
+};
 
 export const action: ActionFunction = async({ request }) => {
     const form = await request.formData();

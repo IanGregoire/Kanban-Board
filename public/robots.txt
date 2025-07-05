@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /login
+Disallow: /signup
+Disallow: /settings
+Disallow: /recoverPassword
+
+Sitemap: https://kanban-board-pied-iota.vercel.app/sitemap.xml

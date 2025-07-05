@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Home page -->
+  <url>
+    <loc>https://kanban-board-pied-iota.vercel.app/</loc>
+    <priority>1.0</priority>
+    <changefreq>daily</changefreq>
+  </url>
+
+  <!-- Auth pages -->
+  <url>
+    <loc>https://kanban-board-pied-iota.vercel.app/login</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://kanban-board-pied-iota.vercel.app/signup</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://kanban-board-pied-iota.vercel.app/recoverPassword</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://kanban-board-pied-iota.vercel.app/settings</loc>
+    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <!-- You can programmatically generate project/task pages if publicly indexable -->
+
+</urlset>
