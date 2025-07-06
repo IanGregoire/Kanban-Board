@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Form, useFetcher } from "@remix-run/react";
-import { Task } from "~/routes/_index";
+import { Task } from "~/routes/dashboard";
 
 type Column = {
   id: number;
@@ -80,6 +80,7 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
     fetcher.submit(formData, {
       method: "POST",
     });
+
     onClose();
   }
 

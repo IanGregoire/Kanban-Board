@@ -1,6 +1,7 @@
 import { Form, Link, useActionData, MetaFunction } from '@remix-run/react';
 import { json, redirect, type ActionFunction } from '@remix-run/node';
 import { supabase } from '~/utils/supabase.server';
+import PublicLayout from "~/components/PublicLayout";
 
 export const meta: MetaFunction = () => {
   return [
@@ -28,6 +29,7 @@ export default function SignUp() {
     const actionData = useActionData<typeof action>();
 
     return (
+      <PublicLayout>
         <div className="max-w-md mx-auto mt-12 p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
           <h1 className="text-2xl font-bold mb-4 text-center text-gray-900 dark:text-white">Sign Up</h1>
 
@@ -42,7 +44,7 @@ export default function SignUp() {
               required
               autoFocus
               className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white dark:border-gray-600"
-            />
+              />
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Password
             </label>
@@ -52,7 +54,7 @@ export default function SignUp() {
               placeholder="Password"
               required
               className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white dark:border-gray-600"
-            />
+              />
             {actionData?.error && <p className="text-red-500 text-sm">{actionData.error}</p>}
             <button type="submit" className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700">
                 Sign Up
@@ -64,5 +66,6 @@ export default function SignUp() {
             <Link to="/login" className="text-blue-600 hover:underline dark:text-blue-400">Log in</Link>
           </p>
         </div>
+      </PublicLayout>
     )
 }

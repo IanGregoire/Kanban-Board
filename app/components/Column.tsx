@@ -1,4 +1,4 @@
-import { Task } from "~/routes/_index";
+import { Task } from "~/routes/dashboard";
 import { Label } from "./TaskModal";
 
 type Props = {

@@ -1,6 +1,7 @@
 import { Form, Link, useActionData } from '@remix-run/react';
 import { json, redirect, type ActionFunction } from '@remix-run/node';
 import { supabase } from '~/utils/supabase.server';
+import PublicLayout from "~/components/PublicLayout";
 
 export const action: ActionFunction = async({ request }) => {
     const form = await request.formData();
@@ -19,6 +20,7 @@ export default function RecoverPassword() {
     const actionData = useActionData<typeof action>();
 
     return (
+      <PublicLayout>
         <div className="max-w-md mx-auto mt-12 p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
           <h1 className="text-2xl font-bold mb-4 text-center text-gray-900 dark:text-white">Recover Password</h1>
 
@@ -30,7 +32,7 @@ export default function RecoverPassword() {
               required 
               autoFocus
               className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" 
-            />
+              />
             {actionData?.error && <p className="text-red-500 text-sm">{actionData.error}</p>}
             {actionData?.success && (
               <p className="text-green-500 text-sm">Check your email for reset instructions.</p>
@@ -45,5 +47,6 @@ export default function RecoverPassword() {
             <Link to="/login" className="text-blue-600 hover:underline">Log in</Link>
           </p>
         </div>
+      </PublicLayout>
     )
 }
