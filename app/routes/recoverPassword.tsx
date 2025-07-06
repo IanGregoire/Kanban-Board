@@ -12,7 +12,7 @@ export const action: ActionFunction = async({ request }) => {
         return json({ error: error.message }, { status: 400 });
     }
 
-    return redirect('/')
+    return redirect('/login')
 }
 
 export default function RecoverPassword() {
