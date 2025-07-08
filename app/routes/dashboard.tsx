@@ -8,6 +8,16 @@ import { json, redirect  } from "@remix-run/node";
 import ProjectModal from "~/components/ProjectModal";
 import TopBar from "~/components/TopBar";
 import DeleteConfirmation from "~/components/DeleteConfirmation";
+import {
+  createProject,
+  deleteProject,
+  createTask,
+  updateTask,
+  deleteTask,
+  updateTaskLabels,
+  maxPosition,
+  deleteLabels,
+} from '~/routes/api/mutations';
 
 type Column = {
   id: number;
@@ -127,7 +137,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   // Use today's date as fallback
   const start_date = formData.get("start_date") || today; // before || today was as string || null
-  const end_date = formData.get("end_date") || today; // Optional — you could also default to today if needed
+  const end_date = formData.get("end_date") || today; 
 
   // Validate 1 label per category
   const { data: allLabels } = await supabase.from("labels").select("*");
@@ -143,45 +153,18 @@ export async function action({ request }: ActionFunctionArgs) {
     }
   }
 
+  if (intent === "create-project") {
+    const name = formData.get("name") as string;
+    const { error } = await createProject(user.id, name);
+    if (error) return json({ error: "Failed to add project" }, { status: 500 });
 
-  if(intent === 'create-project') {
-    const name = formData.get('name') as string;
-
-    if(!name) {
-      return json({ error: 'Project name is required'}, {status: 400});
-    }
-
-    const { error } = await supabase
-      .from('projects')
-      .insert({ name, user_id: user.id, });
-
-    if(error) {
-      console.error('Supabase error:', error.message);
-      return json({ error: 'Failed to add project'}, { status: 500 });
-    }
-
-    return redirect(`/dashboard?projectName=${encodeURIComponent(name!)}`);
+    return redirect(`/dashboard?projectName=${encodeURIComponent(name)}`);
   }
 
   if(intent === 'delete-project') {
     const projectId = formData.get("projectId") as string;
-
-    if (!projectId) {
-      return json({ error: "Project ID missing" }, { status: 400 });
-    }
-  
-    // Optional: delete related tasks first to avoid foreign key constraint
-    await supabase.from("tasks").delete().eq("project_id", projectId);
-  
-    const { error } = await supabase
-      .from("projects")
-      .delete()
-      .eq("id", projectId);
-  
-    if (error) {
-      console.error("Error deleting project:", error.message);
-      return json({ error: "Failed to delete project" }, { status: 500 });
-    }
+    const { error } = await deleteProject(projectId);
+    if (error) return json({ error: "Failed to delete project" }, { status: 500 });
   
     // Fetch remaining projects for this user
     const { data: remainingProjects } = await supabase
@@ -212,7 +195,7 @@ export async function action({ request }: ActionFunctionArgs) {
       return json({ error: 'Failed to delete task labels' }, { status: 500 });
     }
 
-    const { error } = await supabase.from('tasks').delete().eq('id', id);
+    const { error } = await deleteTask(id);
     if(error) {
       console.error(error);
       return json({ error: "Failed to delete task" }, { status: 500});
@@ -227,12 +210,7 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   // Get the max position in the column
-  const { data: maxData, error: maxError } = await supabase
-  .from("tasks")
-  .select("position")
-  .eq("column_id", column_id)
-  .order("position", { ascending: false })
-  .limit(1);
+  const { data: maxData, error: maxError } = await maxPosition(column_id);
   
   if (maxError) {
     console.error("Failed to fetch max position:", maxError);
@@ -244,36 +222,18 @@ export async function action({ request }: ActionFunctionArgs) {
   console.log("Task Mode:", mode);
 
   if(mode === 'edit') {
-    await supabase
-    .from('task_labels')
-    .delete()
-    .eq('task_id', id);
+    await deleteLabels(id)
 
-    const { error } = await supabase
-      .from('tasks')
-      .update({ title, description, git_branch, git_commit, column_id, start_date, end_date })
-      .eq("id", Number(id))
-      .select();
-    
-    if (error) {
-      return json({ error: "Update failed" }, { status: 500 });
-    }
+    const { error } = await updateTask(Number(id), { title, description, git_branch, git_commit, column_id, start_date, end_date })
+    if (error) return json({ error: "Update failed" }, { status: 500 });
     
     if (labelIds.length > 0) {
-      const labelLinks = labelIds.map((labelId) => ({
-        task_id: Number(id),
-        label_id: Number(labelId),
-      }));
-
-      await supabase.from('task_labels').insert(labelLinks).select();
+      await updateTaskLabels(Number(id), labelIds)
     }
 
     return redirect(`/dashboard?projectName=${encodeURIComponent(projectName!)}`);
   } else {
-    const { data: newTasks, error } = await supabase
-      .from("tasks")
-      .insert([{ title, description, git_branch, git_commit, column_id, start_date, end_date, project_id, position: nextPosition}])
-      .select();
+    const { data: newTasks, error } = await createTask([{title, description, git_branch, git_commit, column_id, start_date, end_date, project_id, position: nextPosition}]);
 
     if (error) return json({ error: "Create failed" }, { status: 500 });
 
