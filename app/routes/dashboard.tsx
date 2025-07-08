@@ -39,7 +39,7 @@ export const loader: LoaderFunction = async({ request }) => {
   
   try {
     const url = new URL(request.url);
-    const projectIdFromUrl = url.searchParams.get("projectId");
+    const projectNameFromUrl = url.searchParams.get("projectName");
 
     let { data: projects, error: projectError } = await supabase
     .from("projects")
@@ -65,7 +65,7 @@ export const loader: LoaderFunction = async({ request }) => {
 
     // Determine selected project
     const selectedProject =
-      projects.find((p) => p.id === projectIdFromUrl) || projects[0];
+      projects.find((p) => p.name === projectNameFromUrl) || projects[0];
 
     const { data: columns, error: columnError } = await supabase
     .from("columns")
@@ -103,6 +103,9 @@ export const loader: LoaderFunction = async({ request }) => {
 };
 
 export async function action({ request }: ActionFunctionArgs) {
+  const url = new URL(request.url);
+  const projectName = url.searchParams.get("projectName");
+
   const user = await requireUser(request);
   if (!user) throw new Error("Not authenticated");
 
@@ -157,7 +160,7 @@ export async function action({ request }: ActionFunctionArgs) {
       return json({ error: 'Failed to add project'}, { status: 500 });
     }
 
-    return redirect('/dashboard');
+    return redirect(`/dashboard?projectName=${encodeURIComponent(name!)}`);
   }
 
   if(intent === 'delete-project') {
@@ -180,11 +183,34 @@ export async function action({ request }: ActionFunctionArgs) {
       return json({ error: "Failed to delete project" }, { status: 500 });
     }
   
-    return redirect("/dashboard"); // reload with updated project list
+    // Fetch remaining projects for this user
+    const { data: remainingProjects } = await supabase
+      .from("projects")
+      .select("name")
+      .eq("user_id", user.id)
+      .order("id"); // You can change the ordering if needed
+
+    const nextProject = remainingProjects?.[0]?.name;
+
+    if (nextProject) {
+      return redirect(`/dashboard?projectName=${encodeURIComponent(nextProject)}`);
+    } else {
+      return redirect(`/dashboard`);
+    }
   }
 
   if(intent === 'delete') {
     if(!id) return json({ error: 'Task ID is required' }, { status: 400 });
+
+    const { error: labelDeleteError } = await supabase
+      .from('task_labels')
+      .delete()
+      .eq('task_id', id);
+
+    if (labelDeleteError) {
+      console.error('Failed to delete task labels:', labelDeleteError);
+      return json({ error: 'Failed to delete task labels' }, { status: 500 });
+    }
 
     const { error } = await supabase.from('tasks').delete().eq('id', id);
     if(error) {
@@ -192,7 +218,7 @@ export async function action({ request }: ActionFunctionArgs) {
       return json({ error: "Failed to delete task" }, { status: 500});
     }
 
-    return redirect('/dashboard');
+    return redirect(`/dashboard?projectName=${encodeURIComponent(projectName!)}`);
   }
 
   if (!title ||  !column_id) { // Including !project_id fails check
@@ -218,8 +244,6 @@ export async function action({ request }: ActionFunctionArgs) {
   console.log("Task Mode:", mode);
 
   if(mode === 'edit') {
-    const id = formData.get("id") as string;
-
     await supabase
     .from('task_labels')
     .delete()
@@ -244,7 +268,7 @@ export async function action({ request }: ActionFunctionArgs) {
       await supabase.from('task_labels').insert(labelLinks).select();
     }
 
-    return redirect("/dashboard");
+    return redirect(`/dashboard?projectName=${encodeURIComponent(projectName!)}`);
   } else {
     const { data: newTasks, error } = await supabase
       .from("tasks")
@@ -260,11 +284,11 @@ export async function action({ request }: ActionFunctionArgs) {
         task_id: newTaskId,
         label_id: Number(labelId),
       }))
-      await supabase.from('task_labels').insert(labelLinks).select;
+      await supabase.from('task_labels').insert(labelLinks).select();
     }
   }
 
-  return redirect("/dashboard"); // Reload page to show updated tasks Doesn't work currently
+  return redirect(`/dashboard?projectName=${encodeURIComponent(projectName!)}`);
 }
 
 export default function Dashboard() {
@@ -294,6 +318,7 @@ export default function Dashboard() {
         <TopBar 
           email={email}
           selectedProjectId={selectedProject.id} 
+          selectedProjectName={selectedProject.name} 
           projects={projects} 
           setShowDeleteModal={() => {
             setShowDeleteModal(true);

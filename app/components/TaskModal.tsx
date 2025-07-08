@@ -55,60 +55,32 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
   setSelectedLabels([...newSelected, labelId]);
 }
 
-  function handleSave() {
-    const formData = new FormData();
-    formData.append('mode', mode);
-    if(mode === 'edit') {
-      formData.append('id', task!.id.toString());
-    }
-    if(mode === 'create') {
-      formData.append('project_id', selectedProjectId!);
-    }
-
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("git_branch", gitBranch);
-    formData.append("git_commit", gitCommit);
-    formData.append("column_id", columnId.toString());
-    formData.append("start_date", startDate);
-    formData.append("end_date", endDate);
-
-    selectedLabels.forEach((labelId) => {
-      formData.append("labels", labelId.toString());
-    });
-
-    fetcher.submit(formData, {
-      method: "POST",
-    });
-
-    onClose();
-  }
-
-  function handleDelete() {
-    const formData = new FormData();
-    formData.append('id', task!.id.toString());
-    formData.append('intent', 'delete');
-
-    fetcher.submit(formData, {
-      method: 'POST',
-    })
-
-    onClose();
-  }
-
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-full max-w-lg space-y-4 shadow-xl">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Edit Task</h2>
-          <Form method='post'>
+          <Form method='post' id='task-form' onSubmit={() => onClose()}>
+            <input type="hidden" name="intent" value="save-task" />
+            {mode === "edit" && <input type="hidden" name="id" value={task!.id} />}
+            {mode === "create" && <input type="hidden" name="project_id" value={selectedProjectId} />}
+            <input type="hidden" name="column_id" value={columnId} />
+            <input type="hidden" name="start_date" value={startDate} />
+            <input type="hidden" name="end_date" value={endDate} />
+            <input type="hidden" name="title" value={title} />
+            <input type="hidden" name="description" value={description} />
+            <input type="hidden" name="git_branch" value={gitBranch} />
+            <input type="hidden" name="git_commit" value={gitCommit} />
+            {selectedLabels.map(id => (
+              <input key={id} type="hidden" name="labels" value={id} />
+            ))}
 
-          <div className="space-y-2">
-            <div>
-              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
-                Labels
-              </label>
-              <div className="flex flex-wrap gap-3">
-                 {Object.entries(groupedLabels).map(([category, labels]) => (
+            <div className="space-y-2">
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
+                  Labels
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  {Object.entries(groupedLabels).map(([category, labels]) => (
                     <div key={category}>
                       <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">{category}</p>
                       {labels.map(label => (
@@ -189,21 +161,30 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
           </div>
 
           <div className="flex justify-end space-x-2 mt-4">
+            {mode === "edit" && (
+              <Form method="post" onSubmit={onClose}>
+                <input type="hidden" name="id" value={task?.id.toString()} />
+                <input type="hidden" name="intent" value="delete" />
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
+                >
+                  Delete
+                </button>
+              </Form>
+            )}
             <button
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
-              onClick={handleDelete}
-            >
-              Delete
-            </button>
-            <button
+              type="button"
               className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white rounded"
               onClick={onClose}
             >
               Cancel
             </button>
             <button
+              type="submit"
+              name="mode"
+              value={mode}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
-              onClick={handleSave}
             >
               Save
             </button>
