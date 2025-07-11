@@ -1,5 +1,6 @@
 import { Form } from "@remix-run/react";
-
+import { useEffect, useRef } from "react";
+import { useModalAccessibility } from "~/hooks/useModalAccessability";
 
 interface DeleteConfirmationProps {
     selectedProjectId: number;
@@ -8,10 +9,20 @@ interface DeleteConfirmationProps {
 }
 
 export default function DeleteConfirmation({ selectedProjectId, setShowDeleteModal, handleProjectDelete}: DeleteConfirmationProps) {
-    return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+  const onClose = () =>  setShowDeleteModal();
+  
+  const modalRef = useModalAccessibility(onClose);
+  return (
+        <div
+          ref={modalRef}
+          tabIndex={0}
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-dialog-title"
+        >
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <h2 id="delete-dialog-title" className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Delete Project
             </h2>
             <p className="text-sm text-gray-700 dark:text-gray-300 mb-6">

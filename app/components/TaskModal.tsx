@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Form, useFetcher } from "@remix-run/react";
+import { Form } from "@remix-run/react";
 import { Task } from "~/routes/dashboard";
+import { useModalAccessibility } from "~/hooks/useModalAccessability";
 
 type Column = {
   id: number;
@@ -33,7 +34,7 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
     mode === 'edit' ? task?.labels?.map(l => l.id) ?? [] : []
   );
 
-  const fetcher = useFetcher();
+  const modalRef = useModalAccessibility(onClose);
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -56,7 +57,7 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
 }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div ref={modalRef} tabIndex={0} className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-full max-w-lg space-y-4 shadow-xl">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Edit Task</h2>
           <Form method='post' id='task-form' onSubmit={() => onClose()}>

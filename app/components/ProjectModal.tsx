@@ -1,12 +1,14 @@
 import { Form } from '@remix-run/react';
+import { useModalAccessibility } from '~/hooks/useModalAccessability';
 
 interface ProjectModalProps {
     onClose: () => void;
 }
 
 export default function ProjectModal({ onClose }: ProjectModalProps) {
+    const modalRef = useModalAccessibility(onClose);
     return (
-        <div className='fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50'>
+        <div ref={modalRef} className='fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50'>
             <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg w-96 space-y-4">
                 <h2 className='text-lg font-semibold text-gray-900 dark:text-white mb-2'>Add New Project</h2>
                 <Form method="post" onSubmit={() => onClose()}>
