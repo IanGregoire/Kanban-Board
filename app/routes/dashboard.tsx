@@ -273,7 +273,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       <div className="border-b border-gray-300 dark:border-gray-700">
         <TopBar 
           email={email}
@@ -293,15 +293,18 @@ export default function Dashboard() {
             return true;
           }} />
       </div>
-      <div className="flex justify-center gap-6 p-6">
+      <section
+        aria-label="Task columns"
+        className="flex flex-col sm:flex-row items-center sm:items-start justify-center gap-6 p-6"
+      >
         {columns.map((column: any) => (
           <div key={column.id} className="w-72 min-h-[300px] bg-gray-100 dark:bg-gray-800 p-4 rounded-xl shadow-lg">
             <h3 className="text-center font-semibold text-lg mb-4 text-gray-800 dark:text-white">{column.title}</h3>
-            <ul className="space-y-4 max-h-[500px] overflow-y-auto scrollbar-hide">
+            <ul role="list" className="space-y-4 sm:min-h-[500px] max-h-[500px] overflow-y-auto scrollbar-hide">
             {tasks
             .filter((task: Task) => task.column_id === column.id)
             .map((task: Task) => (
-              <Column key={task.id} task={task} labels={labels} onClick={setSelectedTask} />
+                <Column task={task} labels={labels} onClick={setSelectedTask} />
             ))}
             </ul>
           </div>
@@ -338,7 +341,7 @@ export default function Dashboard() {
           handleProjectDelete={handleProjectDelete}
         />
       )}
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

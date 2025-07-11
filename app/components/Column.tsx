@@ -10,8 +10,18 @@ type Props = {
 export default function Column({ task, labels, onClick }: Props) {
   return (
     <li
-        onClick={() => onClick(task)}
+      role="listitem" 
+      key={task.id}
+      onClick={() => onClick(task)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick(task);
+        }
+      }}
+      tabIndex={0}
       className="cursor-pointer p-3 bg-gray-200 dark:bg-gray-700 rounded-lg shadow hover:bg-gray-300 dark:hover:br-gray-600 transition-colors"
+      aria-label={`View details for task: ${task.title}`}
     >
       <div className="flex flex-wrap gap-1 mb-2">
         {task.labels.map( label => (
