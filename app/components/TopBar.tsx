@@ -17,7 +17,7 @@ interface TopBarProps {
 export default function TopBar({email, selectedProjectId, selectedProjectName, projects, setShowDeleteModal, setShowProjectModal, setShowNewTaskModal}: TopBarProps) {
 
     return (
-      <div className="flex justify-between items-center px-6 py-4 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white border-b border-gray-300 dark:border-gray-700">
+      <div className="relative flex justify-between items-center px-6 py-4 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white border-b border-gray-300 dark:border-gray-700">
         <div className="flex items-center gap-3">
           <Form method="get" className="flex items-center gap-3">
             <select
