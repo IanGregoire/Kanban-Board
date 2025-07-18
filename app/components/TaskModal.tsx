@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Form, useFetcher } from "@remix-run/react";
-import { Task } from "~/routes/_index";
+import { Form } from "@remix-run/react";
+import { Task } from "~/routes/dashboard";
+import { useModalAccessibility } from "~/hooks/useModalAccessability";
 
 type Column = {
   id: number;
@@ -33,7 +34,7 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
     mode === 'edit' ? task?.labels?.map(l => l.id) ?? [] : []
   );
 
-  const fetcher = useFetcher();
+  const modalRef = useModalAccessibility(onClose);
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -55,71 +56,45 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
   setSelectedLabels([...newSelected, labelId]);
 }
 
-  function handleSave() {
-    const formData = new FormData();
-    formData.append('mode', mode);
-    if(mode === 'edit') {
-      formData.append('id', task!.id.toString());
-    }
-    if(mode === 'create') {
-      formData.append('project_id', selectedProjectId!);
-    }
-
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("git_branch", gitBranch);
-    formData.append("git_commit", gitCommit);
-    formData.append("column_id", columnId.toString());
-    formData.append("start_date", startDate);
-    formData.append("end_date", endDate);
-
-    selectedLabels.forEach((labelId) => {
-      formData.append("labels", labelId.toString());
-    });
-
-    fetcher.submit(formData, {
-      method: "POST",
-    });
-    onClose();
-  }
-
-  function handleDelete() {
-    const formData = new FormData();
-    formData.append('id', task!.id.toString());
-    formData.append('intent', 'delete');
-
-    fetcher.submit(formData, {
-      method: 'POST',
-    })
-
-    onClose();
-  }
-
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-full max-w-md space-y-4 shadow-xl">
+    <div ref={modalRef} tabIndex={0} className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-full max-w-lg space-y-4 shadow-xl">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Edit Task</h2>
-          <Form method='post'>
+          <Form method='post' id='task-form' onSubmit={() => onClose()}>
+            <input type="hidden" name="intent" value="save-task" />
+            {mode === "edit" && <input type="hidden" name="id" value={task!.id} />}
+            {mode === "create" && <input type="hidden" name="project_id" value={selectedProjectId} />}
+            <input type="hidden" name="column_id" value={columnId} />
+            <input type="hidden" name="start_date" value={startDate} />
+            <input type="hidden" name="end_date" value={endDate} />
+            <input type="hidden" name="title" value={title} />
+            <input type="hidden" name="description" value={description} />
+            <input type="hidden" name="git_branch" value={gitBranch} />
+            <input type="hidden" name="git_commit" value={gitCommit} />
+            {selectedLabels.map(id => (
+              <input key={id} type="hidden" name="labels" value={id} />
+            ))}
 
-          <div className="space-y-2">
-            <div>
-              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
-                Labels
-              </label>
-              <div className="flex flex-wrap gap-2">
-                 {Object.entries(groupedLabels).map(([category, labels]) => (
+            <div className="space-y-2">
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
+                  Labels
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  {Object.entries(groupedLabels).map(([category, labels]) => (
                     <div key={category}>
-                      <p className="text-sm font-semibold">{category}</p>
+                      <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">{category}</p>
                       {labels.map(label => (
-                        <label key={label.id} className="inline-flex items-center space-x-1 mr-2">
+                        <label key={label.id} className="inline-flex items-center space-x-1">
                           <input
                             type="radio"
                             name={category}
                             value={label.id}
                             checked={selectedLabels.includes(label.id)}
                             onChange={() => toggleCategoryLabel(category, label.id)}
+                            className="accent-blue-600"
                           />
-                          <span className="text-sm" style={{ backgroundColor: label.color }}>{label.name}</span>
+                          <span className="text-xs px-2 py-1 rounded text-white" style={{ backgroundColor: label.color }}>{label.name}</span>
                         </label>
                       ))}
                     </div>
@@ -129,28 +104,28 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
 
             <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">Title</label>
             <input
-              className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
 
             <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">Description</label>
             <textarea
-              className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
 
             <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">Git Branch</label>
             <input
-              className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
               value={gitBranch}
               onChange={(e) => setGitBranch(e.target.value)}
             />
 
             <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">Git Commit</label>
             <input
-              className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
               value={gitCommit}
               onChange={(e) => setGitCommit(e.target.value)}
             />
@@ -158,7 +133,7 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
             <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">Column</label>
             <select
               name='column_id'
-              className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
               defaultValue={task?.column_id ?? columns[0]?.id}
               onChange={(e) => setColumnId(Number(e.target.value))}
               >
@@ -172,7 +147,7 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
             <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">Start Date</label>
             <input
               type="date"
-              className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
               value={task?.start_date}
               onChange={(e) => setStartDate(e.target.value)}
             />
@@ -180,28 +155,37 @@ export default function TaskModal({ task, selectedProjectId, columns, labels, on
             <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium">End Date</label>
             <input
               type="date"
-              className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 dark:text-white"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
             />
           </div>
 
           <div className="flex justify-end space-x-2 mt-4">
+            {mode === "edit" && (
+              <Form method="post" onSubmit={onClose}>
+                <input type="hidden" name="id" value={task?.id.toString()} />
+                <input type="hidden" name="intent" value="delete" />
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
+                >
+                  Delete
+                </button>
+              </Form>
+            )}
             <button
-              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-              onClick={handleDelete}
-            >
-              Delete
-            </button>
-            <button
+              type="button"
               className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white rounded"
               onClick={onClose}
             >
               Cancel
             </button>
             <button
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              onClick={handleSave}
+              type="submit"
+              name="mode"
+              value={mode}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
             >
               Save
             </button>

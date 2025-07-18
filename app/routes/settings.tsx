@@ -1,10 +1,30 @@
 import { json, redirect, type LoaderFunction, type ActionFunction } from '@remix-run/node';
-import { useActionData, useLoaderData, Form } from '@remix-run/react';
+import { useActionData, useLoaderData, Form, MetaFunction } from '@remix-run/react';
+import TopBar from '~/components/TopBar';
 import { supabase, requireUser } from '~/utils/supabase.server';
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Settings - Kanban Board" },
+    { name: "description", content: "Manage Kanban board account information." },
+  ];
+};
 
 export const loader: LoaderFunction = async({ request }) => {
     const user = await requireUser(request); // Redirect if not logged in
-    return json({ email: user.email });
+    const url = new URL(request.url);
+    const projectNameFromUrl = url.searchParams.get("projectName");
+
+    let { data: projects } = await supabase
+    .from("projects")
+    .select("*")
+    .eq("user_id", user.id)
+    .order('id');
+
+    const selectedProject =
+      projects!.find((p) => p.name === projectNameFromUrl) || projects![0];
+      
+    return json({ email: user.email, projects, selectedProject });
 }
 
 export const action: ActionFunction = async({ request }) => {
@@ -37,53 +57,85 @@ export const action: ActionFunction = async({ request }) => {
 
 export default function Settings() {
     const actionData = useActionData<typeof action>();
-    const { email } = useLoaderData<typeof loader>();
+    const { email, projects, selectedProject } = useLoaderData<typeof loader>();
+
+    let redirectUrl = `/dashboard?projectName=${encodeURIComponent(projects[0].name!)}`
 
     return (
-        <div className="max-w-lg mx-auto mt-10 p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
-            <h1 className="text-2xl font-bold mb-6 text-center">User Settings</h1>
-            <p className="text-white">Current email is: { email }</p>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+            <div className="border-b border-gray-300 dark:border-gray-700">
+                <TopBar
+                email={email}
+                selectedProjectId={selectedProject.id} 
+                selectedProjectName={selectedProject.name} 
+                projects={projects} 
+                setShowDeleteModal={() => false}
+                setShowProjectModal={() => false}
+                setShowNewTaskModal={() => false}
+                />
+            </div>
 
-            <Form method="post" className="space-y-4 mb-8">
+            <main className="max-w-lg mx-auto my-10 px-4 sm:px-6 py-6 bg-white dark:bg-gray-800 rounded-lg shadow">
+                <h1 className="text-2xl font-bold mb-6 text-center text-gray-900 dark:text-white">User Settings</h1>
+
+                <section aria-labelledby="current-email-label" className="mb-6">
+                <p id="current-email-label" className="text-gray-800 dark:text-gray-300">
+                    Current email: <span className="font-semibold">{email}</span>
+                </p>
+                </section>
+
+                {/* Update Email Form */}
+                <Form method="post" className="space-y-4 mb-8" role="form" aria-labelledby="email-update-label">
                 <input type="hidden" name="intent" value="update-email" />
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">New Email</label>
+                <label htmlFor="email" id="email-update-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    New Email
+                </label>
                 <input
-                type="email"
-                name="email"
-                required
-                className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                    type="email"
+                    id="email"
+                    name="email"
+                    required
+                    className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 />
-                <button className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded" type="submit">
-                Update Email
+                <button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded">
+                    Update Email
                 </button>
-            </Form>
+                </Form>
 
-            <Form method="post" className="space-y-4">
+                {/* Update Password Form */}
+                <Form method="post" className="space-y-4" role="form" aria-labelledby="password-update-label">
                 <input type="hidden" name="intent" value="update-password" />
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label>
+                <label htmlFor="password" id="password-update-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    New Password
+                </label>
                 <input
-                type="password"
-                name="password"
-                required
-                className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                    type="password"
+                    id="password"
+                    name="password"
+                    required
+                    className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 />
-                <button className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded" type="submit">
-                Update Password
+                <button className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded">
+                    Update Password
                 </button>
-            </Form>
+                </Form>
 
-            {actionData?.error && (
-                <p className="text-red-500 text-sm mt-4">{actionData.error}</p>
-            )}
-            {actionData?.success && (
-                <p className="text-green-500 text-sm mt-4">{actionData.success}</p>
-            )}
-            <a
-                href="/"
-                className="text-sm text-blue-600 hover:underline dark:text-blue-400"
-            >
+                {/* Action feedback */}
+                {(actionData?.error || actionData?.success) && (
+                <div className="mt-4" aria-live="polite">
+                    {actionData?.error && <p className="text-red-500 text-sm">{actionData.error}</p>}
+                    {actionData?.success && <p className="text-green-500 text-sm">{actionData.success}</p>}
+                </div>
+                )}
+
+                {/* Navigation back */}
+                <a
+                href={redirectUrl}
+                className="block mt-6 text-sm text-center text-blue-600 hover:underline dark:text-blue-400"
+                >
                 ← Back to Dashboard
-            </a>
+                </a>
+            </main>
         </div>
     );
 }
