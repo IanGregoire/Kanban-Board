@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionFunctionArgs, LoaderFunction } from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunction, MetaFunction } from "@remix-run/node";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import { supabase, requireUser } from "~/utils/supabase.server"; // Server-side client
 import Column from "~/components/Column";
@@ -37,6 +37,13 @@ export type Task = {
   end_date: string;
   labels: Label[];
 }
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Dashboard - Kanban Board" },
+    { name: "description", content: "Log in to manage your projects with the Kanban board." },
+  ];
+};
 
 // Loader to fetch initial data
 export const loader: LoaderFunction = async({ request }) => {
