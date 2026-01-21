@@ -1,5 +1,6 @@
 // app/routes/_index.tsx
 import { Link } from "@remix-run/react";
+import { BsTags, BsMoonStars, BsFolder } from 'react-icons/bs';
 import PublicLayout from "~/components/PublicLayout";
 
 export default function HomePage() {
@@ -14,21 +15,32 @@ export default function HomePage() {
       </section>
 
       <section className="bg-gray-100 dark:bg-gray-800 py-16 px-4">
-        <div className="max-w-5xl mx-auto grid gap-10 md:grid-cols-3 text-center">
-          <div>
-            <h3 className="text-xl font-semibold mb-2">Task Labels</h3>
-            <p className="text-gray-700 dark:text-gray-300">Prioritize and categorize your tasks with customizable labels.</p>
-          </div>
-          <div>
-            <h3 className="text-xl font-semibold mb-2">Dark/Light Mode</h3>
-            <p className="text-gray-700 dark:text-gray-300">Switch themes effortlessly based on your preference or system settings.</p>
-          </div>
-          <div>
-            <h3 className="text-xl font-semibold mb-2">Project Filtering</h3>
-            <p className="text-gray-700 dark:text-gray-300">Work across multiple projects and filter tasks easily.</p>
-          </div>
+      <div className="max-w-5xl mx-auto grid gap-10 md:grid-cols-3 text-center">
+        <div className="flex flex-col items-center">
+          <BsTags className="text-blue-600 dark:text-blue-400 text-4xl mb-4" />
+          <h3 className="text-xl font-semibold mb-2">Task Labels</h3>
+          <p className="text-gray-700 dark:text-gray-300">
+            Prioritize and categorize your tasks with customizable labels.
+          </p>
         </div>
-      </section>
+
+        <div className="flex flex-col items-center">
+          <BsMoonStars className="text-yellow-500 dark:text-yellow-400 text-4xl mb-4" />
+          <h3 className="text-xl font-semibold mb-2">Dark/Light Mode</h3>
+          <p className="text-gray-700 dark:text-gray-300">
+            Switch themes effortlessly based on your preference or system settings.
+          </p>
+        </div>
+
+        <div className="flex flex-col items-center">
+          <BsFolder className="text-green-600 dark:text-green-400 text-4xl mb-4" />
+          <h3 className="text-xl font-semibold mb-2">Project Filtering</h3>
+          <p className="text-gray-700 dark:text-gray-300">
+            Work across multiple projects and filter tasks easily.
+          </p>
+        </div>
+      </div>
+    </section>
     </PublicLayout>
   );
 }
