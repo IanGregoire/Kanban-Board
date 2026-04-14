@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ActionFunctionArgs, LoaderFunction, MetaFunction } from "@remix-run/node";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import { supabase, requireUser } from "~/utils/supabase.server"; // Server-side client
@@ -8,6 +8,7 @@ import { json, redirect  } from "@remix-run/node";
 import ProjectModal from "~/components/ProjectModal";
 import TopBar from "~/components/TopBar";
 import DeleteConfirmation from "~/components/DeleteConfirmation";
+import { FilterBar } from "~/components/FilterBar";
 import {
   createProject,
   deleteProject,
@@ -264,6 +265,9 @@ export default function Dashboard() {
   const [showNewtaskModal, setShowNewTaskModal] = useState(false);
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedLabels, setSelectedLabels] = useState<number[]>([]);
+  const [selectedColumn, setSelectedColumn] = useState<number | null>(null);
 
   const fetcher = useFetcher();
 
@@ -278,6 +282,24 @@ export default function Dashboard() {
 
     setShowDeleteModal(false)
   }
+
+   // ✅ FILTER LOGIC (memoized for performance)
+  const filteredTasks = useMemo(() => {
+    return tasks.filter((task: any) => {
+      const matchesSearch =
+        task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesLabels =
+        selectedLabels.length === 0 ||
+        task.labels.some((label: any) => selectedLabels.includes(label.id));
+
+      const matchesColumn =
+        !selectedColumn || task.column_id === selectedColumn;
+
+      return matchesSearch && matchesLabels && matchesColumn;
+    });
+  }, [tasks, searchQuery, selectedLabels, selectedColumn]);
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
@@ -300,6 +322,18 @@ export default function Dashboard() {
             return true;
           }} />
       </div>
+      <section aria-label="Filter Bar" className="my-4 flex justify-center">
+        <FilterBar
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          selectedLabels={selectedLabels}
+          setSelectedLabels={setSelectedLabels}
+          selectedColumn={selectedColumn}
+          setSelectedColumn={setSelectedColumn}
+          labels={labels}
+          columns={columns}
+          />
+      </section>
       <section
         aria-label="Task columns"
         className="flex flex-col sm:flex-row items-center sm:items-start justify-center gap-6 p-6"
@@ -308,10 +342,10 @@ export default function Dashboard() {
           <div key={column.id} className="w-72 min-h-[300px] bg-gray-100 dark:bg-gray-800 p-4 rounded-xl shadow-lg">
             <h3 className="text-center font-semibold text-lg mb-4 text-gray-800 dark:text-white">{column.title}</h3>
             <ul role="list" className="space-y-4 sm:min-h-[500px] max-h-[500px] overflow-y-auto scrollbar-hide">
-            {tasks
+            {filteredTasks
             .filter((task: Task) => task.column_id === column.id)
             .map((task: Task) => (
-                <Column task={task} labels={labels} onClick={setSelectedTask} />
+                <Column key={task.id} task={task} labels={labels} onClick={setSelectedTask} />
             ))}
             </ul>
           </div>
