@@ -1,4 +1,6 @@
 import { json, redirect, type ActionFunction, MetaFunction } from  '@remix-run/node';
+import { useState } from 'react';
+import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { Form, Link, useActionData } from '@remix-run/react';
 import { supabase } from '~/utils/supabase.server'; 
 import PublicLayout from "~/components/PublicLayout";
@@ -26,6 +28,7 @@ export const action: ActionFunction = async({ request }) => {
 
 export default function Login() {
     const actionData = useActionData<typeof action>();
+    const [showPassword, setShowPassword] = useState(false);
 
     return (        
       <PublicLayout>
@@ -41,13 +44,18 @@ export default function Login() {
                 autoFocus
                 className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" 
                 />
-              <input 
-                name="password" 
-                type="password" 
-                placeholder="Password" 
-                required 
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" 
-                />
+              <div className='flex'>
+                <input 
+                  name="password" 
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Password" 
+                  required 
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" 
+                  />
+                  <span className="flex justify-around items-center" onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <FaRegEye className='absolute mr-10'/> : <FaRegEyeSlash className='absolute mr-10'/>}
+                  </span>
+                </div>
               {actionData?.error && <p className="text-red-500 text-sm">{actionData.error}</p>}
               <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition-colors">
               Log In

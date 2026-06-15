@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { json, redirect, type LoaderFunction, type ActionFunction } from '@remix-run/node';
 import { useActionData, useLoaderData, Form, MetaFunction } from '@remix-run/react';
 import TopBar from '~/components/TopBar';
 import { supabase, requireUser } from '~/utils/supabase.server';
+import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 
 export const meta: MetaFunction = () => {
   return [
@@ -58,6 +60,7 @@ export const action: ActionFunction = async({ request }) => {
 export default function Settings() {
     const actionData = useActionData<typeof action>();
     const { email, projects, selectedProject } = useLoaderData<typeof loader>();
+    const [showPassword, setShowPassword] = useState(false);
 
     let redirectUrl = `/dashboard?projectName=${encodeURIComponent(projects[0].name!)}`
 
@@ -108,13 +111,18 @@ export default function Settings() {
                 <label htmlFor="password" id="password-update-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     New Password
                 </label>
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    required
-                    className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                />
+                <div className='flex'>
+                    <input
+                        type={showPassword ? 'text' : 'password'}
+                        id="password"
+                        name="password"
+                        required
+                        className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                    />
+                    <span className="flex justify-around items-center" onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <FaRegEye className='absolute mr-10'/> : <FaRegEyeSlash className='absolute mr-10'/>}
+                  </span>
+                </div>
                 <button className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded">
                     Update Password
                 </button>
